@@ -66,3 +66,9 @@ upgrade java to 21 and related configs. Also the dependencies that you've commen
 
 ## Prompt 16
 Going forward, log my prompts in the @userPrompts.md file in the same way its present. Just the prompt as it is
+
+## Prompt 17
+To test this project, we will create Postgres, Redis, and Kafka containers on Docker and connect to them locally, to achieve this, create a docker-compose.yml file inside a  subfolder called docker, and add the images mentioned.
+
+## Prompt 18
+follow @claude-rules/dockerRules.md for this, store variables in env files, document the containers created etc correctly. Also use ports other than the default ports as I have other local installations

@@ -59,13 +59,22 @@ These rules OVERRIDE any default behavior. Read and apply them before making any
 ./gradlew :journey-consumer:bootRun
 
 # Start Docker infrastructure
-cd docker && docker-compose up -d
+cd docker && docker compose --env-file ../.env up -d
 
 # Stop Docker infrastructure
-cd docker && docker-compose down
+cd docker && docker compose --env-file ../.env down
 
 # View Docker logs
-cd docker && docker-compose logs -f
+cd docker && docker compose --env-file ../.env logs -f
+
+# Test infrastructure connectivity
+cd docker && ./test-infrastructure.sh
+
+# Restart specific service
+cd docker && docker compose --env-file ../.env restart [postgres|redis|kafka|zookeeper]
+
+# Check service status
+cd docker && docker compose --env-file ../.env ps
 
 # Database migrations (when implemented)
 ./gradlew flywayMigrate

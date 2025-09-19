@@ -111,3 +111,6 @@ remove any mentions of duration_minutes from entities across DB, openAPI, just u
 
 ## Prompt 31
 Create departure and arrival times for journeys too, across specs, migrations, docs
+
+## Prompt 32
+Lets start creating the actual application layers, lets start with the Admin flow, we will concentrate on the flight creation part (ignoring the consumer, journey creation steps), create the plan for domain Models, controller layer, service layer, Dao layers, its mappers etc. Follow any and all rules in @claude-rules/

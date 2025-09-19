@@ -117,7 +117,6 @@ components:
           description: Arrival time of the last flight in the journey
         total_price:
           type: number
-          format: double
           description: Total price for the journey in USD
         layover_count:
           type: integer

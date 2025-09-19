@@ -128,7 +128,6 @@ components:
           description: Number of passengers in this booking
         total_price:
           type: number
-          format: double
           description: Total price paid for the booking in USD
         status:
           type: string

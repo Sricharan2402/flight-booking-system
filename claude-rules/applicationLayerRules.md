@@ -24,10 +24,6 @@ The Controller layer handles incoming **HTTP requests** and returns **responses*
 - **Incoming Request**: Request DTOs **MUST** be mapped to Service-layer input models before delegation
 - **Outgoing Response**: Service-layer output models **MUST** be mapped to Response DTOs before returning HTTP response
 
-#### Validation
-- All incoming request DTOs **MUST** be validated using Java Bean Validation (e.g., `@Valid`)
-- Validation failures **MUST** result in HTTP 4xx responses (e.g., 400 Bad Request)
-
 **Purpose**: Ensures separation of concerns, protects domain model, and enables API versioning.
 
 ### HTTP Method Semantics

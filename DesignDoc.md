@@ -154,14 +154,16 @@ CREATE TABLE journeys (
     flight_details JSONB NOT NULL,
     source_airport CHAR(3) NOT NULL,
     destination_airport CHAR(3) NOT NULL,
+    departure_time TIMESTAMP NOT NULL,
+    arrival_time TIMESTAMP NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
-    total_duration_minutes INTEGER NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_source_dest (source_airport, destination_airport),
     INDEX idx_price (total_price),
-    INDEX idx_duration (total_duration_minutes),
+    INDEX idx_departure_time (departure_time),
+    INDEX idx_arrival_time (arrival_time),
     UNIQUE INDEX idx_flight_combination (flight_details) -- Prevent duplicate journeys
 );
 ```
@@ -533,7 +535,7 @@ Algorithm: SearchJourneys(source, destination, date, passengers, sort_by)
 
 5. Sorting:
    if (sort_by == "price") ORDER BY total_price ASC
-   if (sort_by == "duration") ORDER BY total_duration_minutes ASC
+   if (sort_by == "duration") ORDER BY (arrival_time - departure_time) ASC
 
 6. Cache results with TTL=600s
 7. Return filtered and sorted results

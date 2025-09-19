@@ -28,11 +28,17 @@ components:
           description: Flight arrival time in ISO 8601 format
         price:
           type: number
-          format: double
           description: Flight price in USD
         airplane_tail_number:
           type: string
           description: Tail number of the airplane
+    FlightReference:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the flight
         order:
           type: integer
           minimum: 1

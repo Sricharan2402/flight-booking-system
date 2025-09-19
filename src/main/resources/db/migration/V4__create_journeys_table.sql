@@ -15,13 +15,7 @@ CREATE TABLE journeys (
 
     -- Business logic constraints
     CONSTRAINT chk_different_airports CHECK (source_airport != destination_airport),
-    CONSTRAINT chk_departure_before_arrival CHECK (departure_time < arrival_time),
-    CONSTRAINT chk_valid_flight_details CHECK (
-        jsonb_typeof(flight_details) = 'object' AND
-        flight_details ? 'flights' AND
-        jsonb_typeof(flight_details->'flights') = 'array' AND
-        jsonb_array_length(flight_details->'flights') BETWEEN 1 AND 3
-    )
+    CONSTRAINT chk_departure_before_arrival CHECK (departure_time < arrival_time)
 );
 
 -- Performance indexes for search queries
@@ -46,11 +40,3 @@ CREATE TRIGGER tr_journeys_updated_at
     BEFORE UPDATE ON journeys
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
--- Add table and column comments
-COMMENT ON TABLE journeys IS 'Precomputed travel combinations containing 1-3 flights for fast search performance';
-COMMENT ON COLUMN journeys.flight_details IS 'JSONB array containing flight IDs and their order: {"flights": [{"id": "uuid", "order": 1}, ...]}';
-COMMENT ON COLUMN journeys.departure_time IS 'Departure time of the first flight in the journey';
-COMMENT ON COLUMN journeys.arrival_time IS 'Arrival time of the last flight in the journey';
-COMMENT ON COLUMN journeys.total_price IS 'Sum of all flight prices in this journey';
-COMMENT ON INDEX idx_journeys_flight_combination IS 'Prevents duplicate journey combinations with same flight sequence';

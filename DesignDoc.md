@@ -193,7 +193,6 @@ CREATE TABLE seats (
     seat_number VARCHAR(5) NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE',
     booking_id UUID NULL,
-    reserved_until TIMESTAMP NULL,
 
     FOREIGN KEY (flight_id) REFERENCES flights(flight_id),
     FOREIGN KEY (booking_id) REFERENCES bookings(booking_id),

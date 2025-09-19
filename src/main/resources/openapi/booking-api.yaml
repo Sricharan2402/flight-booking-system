@@ -128,7 +128,6 @@ components:
           description: Number of passengers in this booking
         total_price:
           type: number
-          format: double
           description: Total price paid for the booking in USD
         status:
           type: string
@@ -185,5 +184,5 @@ components:
         flights:
           type: array
           items:
-            $ref: 'common-components.yaml#/components/schemas/Flight'
+            $ref: 'common-components.yaml#/components/schemas/FlightReference'
           description: List of flight segments in order

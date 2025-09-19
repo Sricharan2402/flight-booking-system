@@ -36,6 +36,9 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
 
+    // Kafka
+    implementation("org.springframework.kafka:spring-kafka")
+
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.8.0")
@@ -70,6 +73,8 @@ flyway {
     schemas = arrayOf("public")
     locations = arrayOf("filesystem:src/main/resources/db/migration")
     cleanOnValidationError = true
+    // allow clean for local dev
+    cleanDisabled = false
 }
 
 // Jooq Configuration

@@ -111,3 +111,46 @@ remove any mentions of duration_minutes from entities across DB, openAPI, just u
 
 ## Prompt 31
 Create departure and arrival times for journeys too, across specs, migrations, docs
+
+## Prompt 32
+Lets start creating the actual application layers, lets start with the Admin flow, we will concentrate on the flight creation part (ignoring the consumer, journey creation steps), create the plan for domain Models, controller layer, service layer, Dao layers, its mappers etc. Follow any and all rules in @claude-rules/
+
+## Prompt 33
+kafka is not initialized. Setup kafka producers, consumers for this, under folders producers, consumers inside com.flightbooking, configure necessary dependencies, add configs, then setup the consumer for this event too. As an extension Create the Journey service, Journey data layer and wrtie up the BFS
+based logic to add scheudles based on new flights being added and existing flights ON THE SAME DAY. Draft a plan for all of this. Look at the existing folder structure, naming conventions and use the same throughout. Keep business validations to a minimum for now.
+
+## Prompt 34
+You wouldnt need JourneyCreationRequest correct? Strictly follow structure and naming conventions.
+
+## Prompt 35
+Journey needs to have departure and arrival time across layers. Add it in the migration files, and anywhere else.
+
+## Prompt 36
+@src/main/kotlin/com/flightbooking/data/JourneyDaoImpl.kt fix syntax issues here
+
+## Prompt 37
+Going forward, log my prompts in the @userPrompts.md file in the same way its present. Just the prompt as it is
+
+## Prompt 38
+@src/main/kotlin/com/flightbooking/services/journeys/JourneyGenerationService.kt Generalise this into an actual BFS implementation. Also as a rule of thumb always use enums for Status fields across entities, Flights, Journeys, Bookings etc. For now, let's make that change in the domain layer and let the API Wire object remain String. Plan this and present it
+
+## Prompt 39
+Lets implement the search and booking functionalitites now. Refer to @DesignDoc.md for the flows. Follow @claude-rules/ for conventions. Ignore business validations for now. Do not use @valid annotations in controllers. Additionally, configure a jedis client to connect to redis, and create a reusable redis client with basic functions such as set, get, and expire, then extend this in separate services for caching or locking purposes as and when needed. Draft a plan for this
+
+## Prompt 40
+As part of this, go ahead and create seats for a flight during flight creation, NOT JOURNEY CREATION, seats are for a flight, get a num seats value in the flight creation request API and create that many seats in the DB. then you can use that in booking flows. Add this to the plan as well. Lets split the plan into two parts. First is everything except redis stuff. Present the plan
+
+## Prompt 41
+could you backfill my prompts in the @userPrompts.md log please
+
+## Prompt 42
+remove any usage of suspend methods for now. If that means removing blocks where Dispatchers.IO are used, that is fine. We can fix this later.
+
+## Prompt 43
+exception bifurcation can be removed for now. Just handle a common exception, that too only in the data layer, producer, and consumers for now. Remove exception handling in service layers and controllers everywhere
+
+## Prompt 44
+backfill my prompts on @userPrompts.md
+
+## Prompt 45
+fix mapper errors in the controller to wire layer. Check for any other syntax issues after that.

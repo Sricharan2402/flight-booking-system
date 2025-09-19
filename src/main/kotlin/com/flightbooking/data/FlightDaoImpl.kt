@@ -1,8 +1,10 @@
 package com.flightbooking.data
 
 import com.flightbooking.data.mapper.FlightDaoMappers
-import com.flightbooking.domain.Flight
-import com.flightbooking.domain.FlightCreationRequest
+import com.flightbooking.data.converter.FlightStatusConverter
+import com.flightbooking.domain.flights.Flight
+import com.flightbooking.domain.flights.FlightCreationRequest
+import com.flightbooking.domain.common.FlightStatus
 import com.flightbooking.common.exception.DatabaseException
 import com.flightbooking.common.exception.FlightAlreadyExistsException
 import com.flightbooking.generated.jooq.tables.references.FLIGHTS
@@ -25,6 +27,7 @@ class FlightDaoImpl(
 ) : FlightDao {
 
     private val logger = LoggerFactory.getLogger(FlightDaoImpl::class.java)
+    private val flightStatusConverter = FlightStatusConverter()
 
     override suspend fun save(flightCreationRequest: FlightCreationRequest): Flight = withContext(Dispatchers.IO) {
         try {
@@ -39,7 +42,7 @@ class FlightDaoImpl(
                 .set(FLIGHTS.ARRIVAL_TIME, toLocalDateTime(flightCreationRequest.arrivalTime))
                 .set(FLIGHTS.AIRPLANE_ID, flightCreationRequest.airplaneId)
                 .set(FLIGHTS.PRICE, flightCreationRequest.price)
-                .set(FLIGHTS.STATUS, "ACTIVE")
+                .set(FLIGHTS.STATUS, flightStatusConverter.to(FlightStatus.ACTIVE))
                 .returningResult(FLIGHTS.asterisk())
                 .fetchOne()
 

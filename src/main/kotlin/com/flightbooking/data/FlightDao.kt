@@ -1,7 +1,7 @@
 package com.flightbooking.data
 
-import com.flightbooking.domain.Flight
-import com.flightbooking.domain.FlightCreationRequest
+import com.flightbooking.domain.flights.Flight
+import com.flightbooking.domain.flights.FlightCreationRequest
 import java.util.*
 
 interface FlightDao {

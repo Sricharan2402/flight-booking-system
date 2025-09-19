@@ -1,5 +1,6 @@
-package com.flightbooking.domain
+package com.flightbooking.domain.flights
 
+import com.flightbooking.domain.common.FlightStatus
 import java.math.BigDecimal
 import java.time.ZonedDateTime
 import java.util.*
@@ -12,7 +13,7 @@ data class Flight(
     val arrivalTime: ZonedDateTime,
     val airplaneId: UUID,
     val price: BigDecimal,
-    val status: String,
+    val status: FlightStatus,
     val createdAt: ZonedDateTime,
     val updatedAt: ZonedDateTime
 )

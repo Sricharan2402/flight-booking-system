@@ -1,4 +1,4 @@
-package com.flightbooking.domain
+package com.flightbooking.domain.flights
 
 import java.math.BigDecimal
 import java.time.ZonedDateTime

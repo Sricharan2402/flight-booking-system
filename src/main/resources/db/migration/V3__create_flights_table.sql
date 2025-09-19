@@ -35,11 +35,3 @@ CREATE TRIGGER tr_flights_updated_at
     BEFORE UPDATE ON flights
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
--- Add table and column comments
-COMMENT ON TABLE flights IS 'Flight schedule information with pricing and capacity';
-COMMENT ON COLUMN flights.flight_number IS 'Airline flight number (e.g., AA123)';
-COMMENT ON COLUMN flights.source_airport IS 'IATA airport code for departure';
-COMMENT ON COLUMN flights.destination_airport IS 'IATA airport code for arrival';
-COMMENT ON COLUMN flights.total_capacity IS 'Total seats available on this flight instance';
-COMMENT ON COLUMN flights.price IS 'Base price per passenger for this flight';

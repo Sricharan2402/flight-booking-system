@@ -2,10 +2,10 @@ package com.flightbooking.controller
 
 import com.flightbooking.controller.mapper.toApiResponse
 import com.flightbooking.controller.mapper.toServiceModel
-import com.flightbooking.admin.service.AdminFlightService
 import com.flightbooking.generated.admin.api.FlightsApi
 import com.flightbooking.generated.admin.model.CreateFlightRequest
 import com.flightbooking.generated.admin.model.FlightResponse
+import com.flightbooking.services.admin.AdminFlightService
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus

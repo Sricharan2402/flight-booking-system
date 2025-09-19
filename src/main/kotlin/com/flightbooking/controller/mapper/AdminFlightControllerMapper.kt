@@ -1,7 +1,7 @@
 package com.flightbooking.controller.mapper
 
-import com.flightbooking.domain.FlightCreationRequest
-import com.flightbooking.domain.FlightCreationResponse
+import com.flightbooking.domain.flights.FlightCreationRequest
+import com.flightbooking.domain.flights.FlightCreationResponse
 import com.flightbooking.generated.admin.model.CreateFlightRequest
 import com.flightbooking.generated.admin.model.FlightResponse
 

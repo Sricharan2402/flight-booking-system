@@ -1,6 +1,7 @@
 package com.flightbooking.data.mapper
 
-import com.flightbooking.domain.Flight
+import com.flightbooking.data.converter.FlightStatusConverter
+import com.flightbooking.domain.flights.Flight
 import com.flightbooking.generated.jooq.tables.records.FlightsRecord
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -9,6 +10,8 @@ import java.time.ZonedDateTime
 
 @Component
 class FlightDaoMappers {
+
+    private val flightStatusConverter = FlightStatusConverter()
 
     fun fromJooqRecord(record: FlightsRecord): Flight {
         return Flight(
@@ -19,7 +22,7 @@ class FlightDaoMappers {
             arrivalTime = toZonedDateTime(record.arrivalTime!!),
             airplaneId = record.airplaneId!!,
             price = record.price!!,
-            status = record.status!!,
+            status = flightStatusConverter.from(record.status!!)!!,
             createdAt = toZonedDateTime(record.createdAt!!),
             updatedAt = toZonedDateTime(record.updatedAt!!)
         )

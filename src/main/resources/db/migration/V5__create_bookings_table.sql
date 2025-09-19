@@ -27,10 +27,3 @@ CREATE TRIGGER tr_bookings_updated_at
     BEFORE UPDATE ON bookings
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
--- Add table and column comments
-COMMENT ON TABLE bookings IS 'Customer reservations for complete journey combinations';
-COMMENT ON COLUMN bookings.user_id IS 'Reference to customer making the booking';
-COMMENT ON COLUMN bookings.number_of_seats IS 'Number of passenger seats reserved for this booking';
-COMMENT ON COLUMN bookings.booking_time IS 'When the initial reservation was made';
-COMMENT ON COLUMN bookings.payment_id IS 'External payment system reference for confirmed bookings';

@@ -22,9 +22,3 @@ CREATE TRIGGER tr_airplanes_updated_at
     BEFORE UPDATE ON airplanes
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
-
--- Add table comment
-COMMENT ON TABLE airplanes IS 'Aircraft information including tail numbers and seating capacity';
-COMMENT ON COLUMN airplanes.tail_number IS 'Unique aircraft identifier visible on fuselage';
-COMMENT ON COLUMN airplanes.capacity IS 'Total number of passenger seats on aircraft';
-COMMENT ON COLUMN airplanes.status IS 'Current operational status of the aircraft';

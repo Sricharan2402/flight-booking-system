@@ -1,0 +1,134 @@
+openapi: 3.0.3
+info:
+  title: Search Service API
+  description: Flight search API for finding journeys
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: Proprietary
+servers:
+  - url: /api/v1
+    description: Production server
+paths:
+  /journeys/search:
+    get:
+      summary: Search for flight journeys
+      description: Search for single or multi-leg flight journeys based on criteria
+      operationId: searchJourneys
+      tags:
+        - Search
+      parameters:
+        - name: source_airport
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 3
+            pattern: '^[A-Z]{3}$'
+          description: Three-letter source airport code
+        - name: destination_airport
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 3
+            pattern: '^[A-Z]{3}$'
+          description: Three-letter destination airport code
+        - name: departure_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          description: Departure date in YYYY-MM-DD format
+        - name: passengers
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 9
+          description: Number of passengers
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [price, duration]
+          description: Sort results by price (cheapest first) or duration (fastest first)
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of results to return
+      responses:
+        '200':
+          description: Search results found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '400':
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    SearchResponse:
+      type: object
+      properties:
+        journeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/Journey'
+          description: List of matching journeys
+        total_count:
+          type: integer
+          description: Total number of journeys found
+    Journey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the journey
+        departure_time:
+          type: string
+          format: date-time
+          description: Departure time of the first flight in the journey
+        arrival_time:
+          type: string
+          format: date-time
+          description: Arrival time of the last flight in the journey
+        total_price:
+          type: number
+          format: double
+          description: Total price for the journey in USD
+        layover_count:
+          type: integer
+          description: Number of layovers (0 for direct flights)
+        flights:
+          type: array
+          items:
+            $ref: 'common-components.yaml#/components/schemas/Flight'
+          minItems: 1
+          maxItems: 3
+          description: List of flight segments in order
+        available_seats:
+          type: integer
+          description: Minimum available seats across all flights in journey

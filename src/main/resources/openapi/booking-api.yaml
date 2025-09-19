@@ -1,0 +1,189 @@
+openapi: 3.0.3
+info:
+  title: Booking Service API
+  description: Flight booking API for reserving and confirming journeys
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: Proprietary
+servers:
+  - url: /api/v1
+    description: Production server
+paths:
+  /bookings:
+    post:
+      summary: Create a new booking
+      description: Creates a booking for a journey with seat reservation and payment
+      operationId: createBooking
+      tags:
+        - Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '400':
+          description: Invalid booking request
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+        '409':
+          description: Insufficient seats available or booking conflict
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+        '404':
+          description: Journey not found
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+  /bookings/{booking_id}:
+    get:
+      summary: Get booking details
+      description: Retrieve details of a specific booking
+      operationId: getBooking
+      tags:
+        - Bookings
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier for the booking
+      responses:
+        '200':
+          description: Booking details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: 'common-components.yaml#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    CreateBookingRequest:
+      type: object
+      required:
+        - journey_id
+        - passenger_count
+        - passenger_details
+        - payment_id
+      properties:
+        journey_id:
+          type: string
+          format: uuid
+          description: UUID of the journey to book
+        passenger_count:
+          type: integer
+          minimum: 1
+          maximum: 9
+          description: Number of passengers for this booking
+        payment_id:
+          type: string
+          description: Payment transaction ID for this booking
+    BookingResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the booking
+        journey_id:
+          type: string
+          format: uuid
+          description: UUID of the booked journey
+        passenger_count:
+          type: integer
+          description: Number of passengers in this booking
+        total_price:
+          type: number
+          format: double
+          description: Total price paid for the booking in USD
+        status:
+          type: string
+          enum: [confirmed, pending, cancelled]
+          description: Current status of the booking
+        payment_id:
+          type: string
+          description: Payment transaction ID for this booking
+        seat_assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeatAssignment'
+          description: Seat assignments for each flight in the journey
+        journey_details:
+          $ref: '#/components/schemas/JourneyDetails'
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the booking was created
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when the booking was last updated
+    SeatAssignment:
+      type: object
+      properties:
+        flight_id:
+          type: string
+          format: uuid
+          description: UUID of the flight
+        seat_numbers:
+          type: array
+          items:
+            type: string
+          description: List of assigned seat numbers for this flight
+    JourneyDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the journey
+        departure_time:
+          type: string
+          format: date-time
+          description: Departure time of the first flight in the journey
+        arrival_time:
+          type: string
+          format: date-time
+          description: Arrival time of the last flight in the journey
+        layover_count:
+          type: integer
+          description: Number of layovers (0 for direct flights)
+        flights:
+          type: array
+          items:
+            $ref: 'common-components.yaml#/components/schemas/Flight'
+          description: List of flight segments in order

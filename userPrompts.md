@@ -66,3 +66,48 @@ upgrade java to 21 and related configs. Also the dependencies that you've commen
 
 ## Prompt 16
 Going forward, log my prompts in the @userPrompts.md file in the same way its present. Just the prompt as it is
+
+## Prompt 17
+To test this project, we will create Postgres, Redis, and Kafka containers on Docker and connect to them locally, to achieve this, create a docker-compose.yml file inside a  subfolder called docker, and add the images mentioned.
+
+## Prompt 18
+follow @claude-rules/dockerRules.md for this, store variables in env files, document the containers created etc correctly. Also use ports other than the default ports as I have other local installations
+
+## Prompt 19
+Going forward, log my prompts in the @userPrompts.md file in the same way its present. Just the prompt as it is
+
+## Prompt 20
+Create the infra for connecting to posgres that is running via the docker local setup. Add postgres dependencies, jooq generator config, application.yml config changes. use the correct db name, user, password info
+
+## Prompt 21
+jooq dependency is failing, check incompatibilites, spring boot to upconflicts or something, upgrade spring boot to 3.5
+
+## Prompt 22
+going forward, do not do gradle builds, prompt me and I'll do them, don'waste your token on them
+
+## Prompt 23
+create the migration files follow the rules in @claude-rules/postgresSetupRules.md. Refer to @DesignDoc.md for the schema. Also create created_at, updated_at columns for all tables where created_at defaults to now, updated_at defaults to now and create triggers on all updated_at to get updated to now() whenever a record changes
+
+## Prompt 24
+remove all FK references. Do not use FK anywhere in this project
+
+## Prompt 25
+flyway is failing, check
+
+## Prompt 26
+Going forward, log my prompts in the @userPrompts.md file in the same way its present. Just the prompt as it is
+
+## Prompt 27
+lets start with the actual dev. First create open API specs in side resouces in a subfolder called open-api, create APIs for the flows that we've pointed out. For the Admin service, create a create flight API, for the user, there's the search for flights and book a flight APIs
+
+## Prompt 28
+Healh is repeated across all files. We dont need that. keep it once, maybe in a separate file called health controller, remove all examples, default values fromt the openAPI spec. FlightSegment has been repeated twice, again, check the rules in @claude-rules/openApiRules.md, keep repeated components in a common spec file and reuse them. Name it just Flight, not flight segment.
+
+## Prompt 29
+Create an open API server spec generation config in @build.gradle.kts for this
+
+## Prompt 30
+remove any mentions of duration_minutes from entities across DB, openAPI, just use departure and arrival times across, also update in the designdoc
+
+## Prompt 31
+Create departure and arrival times for journeys too, across specs, migrations, docs

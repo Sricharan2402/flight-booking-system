@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Common Components
+  description: Shared schemas and components for all services
+  version: 1.0.0
+components:
+  schemas:
+    Flight:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the flight
+        source_airport:
+          type: string
+          description: Three-letter source airport code
+        destination_airport:
+          type: string
+          description: Three-letter destination airport code
+        departure_time:
+          type: string
+          format: date-time
+          description: Flight departure time in ISO 8601 format
+        arrival_time:
+          type: string
+          format: date-time
+          description: Flight arrival time in ISO 8601 format
+        price:
+          type: number
+          format: double
+          description: Flight price in USD
+        airplane_tail_number:
+          type: string
+          description: Tail number of the airplane
+        order:
+          type: integer
+          minimum: 1
+          maximum: 3
+          description: Order of this flight in the journey
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message describing what went wrong
+        details:
+          type: string
+          description: Additional details about the error
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp when the error occurred

@@ -1,0 +1,100 @@
+# Flight Booking System - Docker Infrastructure
+# Services: PostgreSQL 15, Redis 7, Kafka 3.x with Zookeeper
+# Non-default ports used to avoid conflicts with local installations
+# Use: docker compose --env-file ../.env up -d
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database - Port 5433 (non-default)
+  postgres:
+    image: postgres:15
+    container_name: flight-booking-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-flight_booking}
+      POSTGRES_USER: ${POSTGRES_USER:-flight_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flight_password}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - ${POSTGRES_VOLUME:-postgres_data}:/var/lib/postgresql/data
+    networks:
+      - ${DOCKER_NETWORK_NAME:-flight-booking-network}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flight_user} -d ${POSTGRES_DB:-flight_booking}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis Cache - Port 6380 (non-default)
+  redis:
+    image: redis:7-alpine
+    container_name: flight-booking-redis
+    ports:
+      - "${REDIS_PORT:-6380}:6379"
+    volumes:
+      - ${REDIS_VOLUME:-redis_data}:/data
+    networks:
+      - ${DOCKER_NETWORK_NAME:-flight-booking-network}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # Zookeeper for Kafka - Port 2182 (non-default)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: flight-booking-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "${ZOOKEEPER_PORT:-2182}:2181"
+    networks:
+      - ${DOCKER_NETWORK_NAME:-flight-booking-network}
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # Kafka Message Broker - Port 9093 (non-default)
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: flight-booking-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "${KAFKA_PORT:-9093}:9092"
+    environment:
+      KAFKA_BROKER_ID: ${KAFKA_BROKER_ID:-1}
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:${KAFKA_PORT:-9093},PLAINTEXT_HOST://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: ${KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR:-1}
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: ${KAFKA_TRANSACTION_STATE_LOG_MIN_ISR:-1}
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: ${KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR:-1}
+    networks:
+      - ${DOCKER_NETWORK_NAME:-flight-booking-network}
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  postgres_data:
+    name: ${POSTGRES_VOLUME:-postgres_data}
+  redis_data:
+    name: ${REDIS_VOLUME:-redis_data}
+
+networks:
+  flight-booking-network:
+    name: ${DOCKER_NETWORK_NAME:-flight-booking-network}
+    driver: bridge

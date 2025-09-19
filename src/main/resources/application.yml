@@ -5,20 +5,26 @@ spring:
   profiles:
     active: local
 
-  # Database configuration - commented out for initial setup
-  # datasource:
-  #   url: jdbc:postgresql://localhost:5432/flightdb
-  #   username: flightuser
-  #   password: flightpass
-  #   driver-class-name: org.postgresql.Driver
+  # PostgreSQL Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5433/flight_booking
+    username: flight_user
+    password: flight_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
-  # jpa:
-  #   hibernate:
-  #     ddl-auto: validate
-  #   show-sql: false
-  #   properties:
-  #     hibernate:
-  #       dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Flyway Configuration
+  flyway:
+    url: jdbc:postgresql://localhost:5433/flight_booking
+    user: flight_user
+    password: flight_password
+    schemas: public
+    clean-disabled: false
 
   # data:
   #   redis:

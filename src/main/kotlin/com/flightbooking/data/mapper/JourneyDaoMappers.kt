@@ -2,7 +2,6 @@ package com.flightbooking.data.mapper
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.flightbooking.data.converter.JourneyStatusConverter
 import com.flightbooking.domain.journeys.FlightReference
 import com.flightbooking.domain.journeys.Journey
 import com.flightbooking.generated.jooq.tables.records.JourneysRecord

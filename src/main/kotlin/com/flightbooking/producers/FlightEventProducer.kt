@@ -18,7 +18,7 @@ class FlightEventProducer(
         private const val FLIGHT_EVENTS_TOPIC = "flight-events"
     }
 
-    suspend fun publishFlightCreatedEvent(event: FlightCreationEvent) = withContext(Dispatchers.IO) {
+    fun publishFlightCreatedEvent(event: FlightCreationEvent) {
         try {
             val key = event.flightId.toString()
             logger.debug("Publishing flight created event for flight ID: ${event.flightId}")

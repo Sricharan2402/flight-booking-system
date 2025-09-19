@@ -23,26 +23,18 @@ class AdminFlightController(
 
     // Placeholder method - will implement FlightsApi interface once OpenAPI generation is complete
     override fun createFlight(createFlightRequest: CreateFlightRequest): ResponseEntity<FlightResponse> {
-        return runBlocking {
-            try {
-                logger.info("Received flight creation request")
+        logger.info("Received flight creation request")
 
-                // Map request DTO to service model
-                val serviceRequest = createFlightRequest.toServiceModel()
+        // Map request DTO to service model
+        val serviceRequest = createFlightRequest.toServiceModel()
 
-                // Call service layer
-                val serviceResponse = adminFlightService.createFlight(serviceRequest)
+        // Call service layer
+        val serviceResponse = adminFlightService.createFlight(serviceRequest)
 
-                // Map service response to API response
-                val apiResponse = serviceResponse.toApiResponse()
+        // Map service response to API response
+        val apiResponse = serviceResponse.toApiResponse()
 
-                logger.info("Successfully created flight with ID: ${serviceResponse.flightId}")
-                ResponseEntity.status(HttpStatus.CREATED).body(apiResponse)
-
-            } catch (e: Exception) {
-                logger.error("Error creating flight: ${e.message}", e)
-                throw e // Let global exception handler deal with it
-            }
-        }
+        logger.info("Successfully created flight with ID: ${serviceResponse.flightId}")
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse)
     }
 }

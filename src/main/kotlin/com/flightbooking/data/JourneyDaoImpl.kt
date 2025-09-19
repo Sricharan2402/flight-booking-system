@@ -3,16 +3,14 @@ package com.flightbooking.data
 import com.flightbooking.common.exception.DatabaseException
 import com.flightbooking.data.mapper.FlightDaoMappers
 import com.flightbooking.data.mapper.JourneyDaoMappers
-import com.flightbooking.data.converter.JourneyStatusConverter
-import com.flightbooking.data.converter.FlightStatusConverter
+import com.flightbooking.data.mapper.JourneyStatusConverter
+import com.flightbooking.data.mapper.FlightStatusConverter
 import com.flightbooking.domain.flights.Flight
 import com.flightbooking.domain.journeys.Journey
 import com.flightbooking.domain.common.JourneyStatus
 import com.flightbooking.domain.common.FlightStatus
 import com.flightbooking.generated.jooq.tables.references.FLIGHTS
 import com.flightbooking.generated.jooq.tables.references.JOURNEYS
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.jooq.DSLContext
 import org.jooq.JSONB
 import org.jooq.exception.DataAccessException
@@ -36,8 +34,8 @@ class JourneyDaoImpl(
     private val journeyStatusConverter = JourneyStatusConverter()
     private val flightStatusConverter = FlightStatusConverter()
 
-    override suspend fun save(journey: Journey): Journey = withContext(Dispatchers.IO) {
-        try {
+    override fun save(journey: Journey): Journey {
+        return try {
             val journeyId = UUID.randomUUID()
             logger.debug("Saving journey with ID: $journeyId")
 
@@ -73,12 +71,12 @@ class JourneyDaoImpl(
         }
     }
 
-    override suspend fun findBySourceAndDestinationAndDate(
+    override fun findBySourceAndDestinationAndDate(
         source: String,
         destination: String,
         date: LocalDate
-    ): List<Journey> = withContext(Dispatchers.IO) {
-        try {
+    ): List<Journey> {
+        return try {
             logger.debug("Finding journeys from $source to $destination on $date")
 
             val results = dslContext.selectFrom(JOURNEYS)
@@ -102,8 +100,8 @@ class JourneyDaoImpl(
         }
     }
 
-    override suspend fun findFlightsByDate(date: LocalDate): List<Flight> = withContext(Dispatchers.IO) {
-        try {
+    override fun findFlightsByDate(date: LocalDate): List<Flight> {
+        return try {
             logger.debug("Finding flights on date: $date")
 
             val results = dslContext.selectFrom(FLIGHTS)
@@ -125,8 +123,8 @@ class JourneyDaoImpl(
         }
     }
 
-    override suspend fun findById(journeyId: UUID): Journey? = withContext(Dispatchers.IO) {
-        try {
+    override fun findById(journeyId: UUID): Journey? {
+        return try {
             logger.debug("Finding journey by ID: $journeyId")
 
             val result = dslContext.selectFrom(JOURNEYS)

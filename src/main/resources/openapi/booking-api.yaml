@@ -184,5 +184,5 @@ components:
         flights:
           type: array
           items:
-            $ref: 'common-components.yaml#/components/schemas/Flight'
+            $ref: 'common-components.yaml#/components/schemas/FlightReference'
           description: List of flight segments in order

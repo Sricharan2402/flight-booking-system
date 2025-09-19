@@ -133,3 +133,24 @@ Going forward, log my prompts in the @userPrompts.md file in the same way its pr
 
 ## Prompt 38
 @src/main/kotlin/com/flightbooking/services/journeys/JourneyGenerationService.kt Generalise this into an actual BFS implementation. Also as a rule of thumb always use enums for Status fields across entities, Flights, Journeys, Bookings etc. For now, let's make that change in the domain layer and let the API Wire object remain String. Plan this and present it
+
+## Prompt 39
+Lets implement the search and booking functionalitites now. Refer to @DesignDoc.md for the flows. Follow @claude-rules/ for conventions. Ignore business validations for now. Do not use @valid annotations in controllers. Additionally, configure a jedis client to connect to redis, and create a reusable redis client with basic functions such as set, get, and expire, then extend this in separate services for caching or locking purposes as and when needed. Draft a plan for this
+
+## Prompt 40
+As part of this, go ahead and create seats for a flight during flight creation, NOT JOURNEY CREATION, seats are for a flight, get a num seats value in the flight creation request API and create that many seats in the DB. then you can use that in booking flows. Add this to the plan as well. Lets split the plan into two parts. First is everything except redis stuff. Present the plan
+
+## Prompt 41
+could you backfill my prompts in the @userPrompts.md log please
+
+## Prompt 42
+remove any usage of suspend methods for now. If that means removing blocks where Dispatchers.IO are used, that is fine. We can fix this later.
+
+## Prompt 43
+exception bifurcation can be removed for now. Just handle a common exception, that too only in the data layer, producer, and consumers for now. Remove exception handling in service layers and controllers everywhere
+
+## Prompt 44
+backfill my prompts on @userPrompts.md
+
+## Prompt 45
+fix mapper errors in the controller to wire layer. Check for any other syntax issues after that.

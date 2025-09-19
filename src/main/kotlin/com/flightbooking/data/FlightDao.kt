@@ -6,7 +6,7 @@ import java.util.*
 
 interface FlightDao {
 
-    suspend fun save(flightCreationRequest: FlightCreationRequest): Flight
+    fun save(flightCreationRequest: FlightCreationRequest): Flight
 
-    suspend fun findById(flightId: UUID): Flight?
+    fun findById(flightId: UUID): Flight?
 }

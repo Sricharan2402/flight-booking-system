@@ -1,6 +1,5 @@
 package com.flightbooking.data.mapper
 
-import com.flightbooking.data.converter.FlightStatusConverter
 import com.flightbooking.domain.flights.Flight
 import com.flightbooking.generated.jooq.tables.records.FlightsRecord
 import org.springframework.stereotype.Component

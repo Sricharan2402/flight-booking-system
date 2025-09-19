@@ -1,4 +1,4 @@
-package com.flightbooking.data.converter
+package com.flightbooking.data.mapper
 
 import com.flightbooking.domain.common.FlightStatus
 import com.flightbooking.domain.common.JourneyStatus

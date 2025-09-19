@@ -6,8 +6,6 @@ import com.flightbooking.domain.common.JourneyStatus
 import com.flightbooking.domain.flights.Flight
 import com.flightbooking.domain.journeys.FlightReference
 import com.flightbooking.domain.journeys.Journey
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -30,13 +28,13 @@ class JourneyGenerationService(
     }
 
     @Transactional
-    suspend fun generateJourneysForNewFlight(flightId: UUID) = withContext(Dispatchers.IO) {
+    fun generateJourneysForNewFlight(flightId: UUID) {
         logger.info("Starting BFS journey generation for new flight ID: $flightId")
 
         val newFlight = flightDao.findById(flightId)
         if (newFlight == null) {
             logger.warn("Flight with ID $flightId not found, skipping journey generation")
-            return@withContext
+            return
         }
 
         val flightDate = newFlight.departureTime.toLocalDate()

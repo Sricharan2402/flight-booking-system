@@ -34,3 +34,35 @@ Usage notes:
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 ```
+## Prompt 6
+the HLD diagram in @DesignDoc.md is still incorrect, there are two clients, User and Admin. Both interact via Gateway. Admin client to admin service, user client to search and booking service. Admin, Ingestion consumer, Booking and Search all interact with DB. Correct this
+
+## Prompt 7
+You missed admin client interacting with admin service. Stack them all vertically, admin and user clients. Followed by API Gateway, ALL services interact with the Database. ALL services except ingestion consumer gets requests from API Gateway. SERVICES REQUEST TO CACHES, not the other way around. SEPARATE the cache for booking and search service
+
+## Prompt 8
+separate out the flows in HLD in @DesignDoc.md. The client facing flows as one, the ingestion flow as the other
+
+## Prompt 9
+not the algo, just the HLD diagram
+
+## Prompt 10
+cehck the @userPrompts.md file. From the NEXT command (not this command), add similar logs of my user prompts
+
+## Prompt 11
+Convert this repository into a Kotlin Gradle Spring Boot project. Make changes as required - add build.gradle.kts changes, configure dependencies
+
+## Prompt 12
+lets keep it simple, continue with just the src folder, we dont need multi module setup. follow proper folder structure inside the src folder
+
+## Prompt 13
+lets not start coding ryt away. complete making this bootRUnnable with spring boot. Lets start actual coding later
+
+## Prompt 14
+do a gradle build
+
+## Prompt 15
+upgrade java to 21 and related configs. Also the dependencies that you've commented out, remove anything that is not immediately necessary, we can add them later on if required.
+
+## Prompt 16
+Going forward, log my prompts in the @userPrompts.md file in the same way its present. Just the prompt as it is

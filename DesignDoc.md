@@ -53,43 +53,67 @@ The system covers flight search, multi-leg journey planning, seat booking with c
 The system follows a microservices architecture with event-driven journey generation and aggressive caching for search performance.
 
 ```
-┌─────────────┐    ┌──────────────┐    ┌─────────────────┐
-│   Client    │───▶│ API Gateway  │───▶│  Search Service │
-└─────────────┘    └──────────────┘    └─────────────────┘
-                            │                     │
-                            │                     ▼
-                            │            ┌─────────────────┐
-                            │            │     Redis       │
-                            │            │  (Cache/Locks)  │
-                            │            └─────────────────┘
-                            │                     │
-                            ▼                     │
-                   ┌──────────────┐              │
-                   │Booking Service│◀─────────────┘
-                   └──────────────┘
-                            │
-                            ▼
-                   ┌─────────────────┐
-                   │   PostgreSQL    │◀─────┐
-                   │   (Primary DB)  │      │
-                   └─────────────────┘      │
-                            ▲               │
-                            │               │
-                   ┌──────────────┐         │
-                   │Admin Service │─────────┘
-                   └──────────────┘
-                            │
-                            ▼
-                   ┌──────────────┐
-                   │    Kafka     │
-                   └──────────────┘
-                            │
-                            ▼
-                   ┌──────────────┐
-                   │   Journey    │
-                   │ Ingestion    │
-                   │  Consumer    │
-                   └──────────────┘
+               ┌─────────────┐    ┌─────────────┐
+               │ User Client │    │ Admin Client│
+               └──────┬──────┘    └──────┬──────┘
+                      │                 │
+                      └──────┬──────────┘
+                             ▼
+                  ┌───────────────────────┐
+                  │      API Gateway      │
+                  │  (Routing/Auth/Rate)  │
+                  └─────────┬─────────────┘
+             ┌──────────────┼──────────────┐
+             ▼              ▼              ▼
+   ┌────────────────┐ ┌──────────────┐ ┌─────────────┐
+   │ Journey Search │ │ Admin Service │ │ Booking Svc │
+   │    Service     │ │ (Add Flights) │ │ (Book Seats)│
+   └───────┬────────┘ └──────┬───────┘ └──────┬──────┘
+           │                 │                │
+           ▼                 │                ▼
+   ┌─────────────┐           │         ┌──────────────┐
+   │ Redis       │           │         │ Redis        │
+   │ (Search     │           │         │ (Seat Locks) │
+   │ Cache/CDN)  │           │         └──────────────┘
+   └──────┬──────┘           │                │
+          │                  │                │
+          ▼                  │                ▼
+   ┌────────────────────┐    │          ┌───────────────┐
+   │    PostgreSQL      │<───┘          │ Booking Svc   │
+   │ Flights/Journeys/  │               │ (final writes │
+   │ Seats/Bookings     │               │ + reads)      │
+   └────────────────────┘               └───────────────┘
+```
+
+```
+          ┌──────────────┐
+          │ Admin Service│
+          │ (Add Flight) │
+          └───────┬──────┘
+                  │
+                  ▼
+        ┌──────────────────┐
+        │  PostgreSQL      │
+        │  (Flights Table) │
+        └───────┬──────────┘
+                │
+                ▼
+             ┌─────────┐
+             │  Kafka  │
+             └────┬────┘
+                  │ flight-created event
+                  ▼
+   ┌─────────────────────────┐
+   │ Journey Ingestion       │
+   │ Consumer (Precompute)   │
+   └─────────────┬───────────┘
+                 │
+                 ▼
+        ┌──────────────────┐
+        │  PostgreSQL      │
+        │  (Journeys Table)│
+        └──────────────────┘
+
 ```
 
 ### Design Principles

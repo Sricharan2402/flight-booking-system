@@ -2,9 +2,9 @@ package com.flightbooking.controller
 
 import com.flightbooking.controller.mapper.toApiResponse
 import com.flightbooking.controller.mapper.toServiceModel
-import com.flightbooking.generated.booking.api.BookingsApi
-import com.flightbooking.generated.booking.model.CreateBookingRequest
-import com.flightbooking.generated.booking.model.BookingResponse
+import com.flightbooking.generated.server.api.BookingsApi
+import com.flightbooking.generated.server.model.CreateBookingRequest
+import com.flightbooking.generated.server.model.BookingResponse
 import com.flightbooking.services.booking.BookingService
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -19,10 +19,13 @@ class BookingController(
 
     private val logger = LoggerFactory.getLogger(BookingController::class.java)
 
-    override fun createBooking(createBookingRequest: CreateBookingRequest): ResponseEntity<BookingResponse> {
+    override fun createBooking(
+        userId: String,
+        createBookingRequest: CreateBookingRequest
+    ): ResponseEntity<BookingResponse> {
         logger.info("Creating booking for journey ${createBookingRequest.journeyId}")
 
-        val bookingRequest = createBookingRequest.toServiceModel()
+        val bookingRequest = createBookingRequest.toServiceModel(userId)
         val bookingResponse = bookingService.createBooking(bookingRequest)
         val apiResponse = bookingResponse.toApiResponse()
 

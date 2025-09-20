@@ -154,3 +154,47 @@ backfill my prompts on @userPrompts.md
 
 ## Prompt 45
 fix mapper errors in the controller to wire layer. Check for any other syntax issues after that.
+
+## Prompt 46
+get the context from @DesignDoc.md, Go through the @src/ folder to get context of the service. Once done, lmk if there are any pending implementations other than caching layers in search or lock flows, any TODO(), placeholder values, bugs etc
+
+## Prompt 47
+lets completely ignore authentication, API Gateway, scaling concerns, microservice missing. Take the actual bugs, TODO(), TBDs and list them,   1. Booking Service - Lack of Atomicity
+
+  - Missing Redis distributed locks before seat reservation
+  - No transaction rollback mechanism if seat assignment fails
+  - Race condition potential in reserveSeatsForJourney() at BookingService.kt:112
+
+  2. Journey Generation - Potential Infinite Loop
+
+  - BFS algorithm in JourneyGenerationService.kt:47 could theoretically create very long paths
+  - Missing validation for reasonable journey duration limits
+
+  3. Data Consistency Issues
+
+  - No implementation of the design's strong consistency requirements
+  - Missing seat availability validation during concurrent bookings whats the diff b/w 1 and 3 if redis were to be implemented, which bugs would remain, just list them
+
+## Prompt 48
+go ahead and create a markdown file called openBugs.md, add to gitignore. Then draft a plan to add Redis implementation for the search caching and booking locking flows. Jedis client, correct dependencies, configs, then changes in actual service layer to use these
+
+## Prompt 49
+not the way i want to lock. i want to store the seatIds in a sorted set with expiryTime. then during booking flows, I get active seats from DB, then check in sorted set to filter elements, also remove expired elements from sorted set
+
+## Prompt 50
+implement this
+
+## Prompt 51
+there seem to be syntax issues in your changes, check and fix them
+
+## Prompt 52
+update oopenBugs.md with current status
+
+## Prompt 53
+backfill my prompts in @userPrompts.md, continue to log it there
+
+## Prompt 54
+Journey and JourneySearchResult seem redundant, just return a list of journeys in search response, should also take care of the flight number mapping bug
+
+## Prompt 55
+re evaluate openBugs now, also kafka connection is not working debug that

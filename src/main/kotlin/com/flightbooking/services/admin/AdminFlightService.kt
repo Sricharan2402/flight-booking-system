@@ -22,7 +22,6 @@ class AdminFlightService(
 
     private val logger = LoggerFactory.getLogger(AdminFlightService::class.java)
 
-    @Transactional
     fun createFlight(request: FlightCreationRequest): FlightCreationResponse {
         logger.info("Creating flight from ${request.sourceAirport} to ${request.destinationAirport}")
 

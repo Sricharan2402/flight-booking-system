@@ -22,7 +22,7 @@ data class BookingRequest(
     val journeyId: UUID,
     val passengerCount: Int,
     val paymentId: String,
-    val userId: UUID? = null // Optional, can be extracted from auth context
+    val userId: UUID
 )
 
 data class BookingResponse(

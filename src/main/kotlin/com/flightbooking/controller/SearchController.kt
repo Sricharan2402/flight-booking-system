@@ -2,8 +2,8 @@ package com.flightbooking.controller
 
 import com.flightbooking.controller.mapper.toApiResponse
 import com.flightbooking.domain.search.SearchRequest
-import com.flightbooking.generated.search.api.JourneysApi
-import com.flightbooking.generated.search.model.SearchResponse
+import com.flightbooking.generated.server.api.JourneysApi
+import com.flightbooking.generated.server.model.SearchResponse
 import com.flightbooking.services.search.SearchService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -36,8 +36,8 @@ class SearchController(
             limit = limit
         )
 
-        val searchResponse = searchService.searchJourneys(searchRequest)
-        val apiResponse = searchResponse.toApiResponse()
+        val (searchResponse, seatCounts) = searchService.searchJourneysWithSeats(searchRequest)
+        val apiResponse = searchResponse.toApiResponse(seatCounts)
 
         logger.info("Found ${searchResponse.totalCount} journeys for search request")
         return ResponseEntity.ok(apiResponse)

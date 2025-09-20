@@ -10,8 +10,8 @@ fun CreateFlightRequest.toServiceModel(): FlightCreationRequest {
     return FlightCreationRequest(
         sourceAirport = this.sourceAirport,
         destinationAirport = this.destinationAirport,
-        departureTime = this.departureTime.atZoneSameInstant(ZoneOffset.UTC),
-        arrivalTime = this.arrivalTime.atZoneSameInstant(ZoneOffset.UTC),
+        departureTime = this.departureTime,
+        arrivalTime = this.arrivalTime,
         airplaneId = this.airplaneId,
         price = this.price,
         totalSeats = this.totalSeats
@@ -23,14 +23,13 @@ fun FlightCreationResponse.toApiResponse(): FlightResponse {
         id = this.flightId,
         sourceAirport = this.sourceAirport,
         destinationAirport = this.destinationAirport,
-        departureTime = this.departureTime.toOffsetDateTime(),
-        arrivalTime = this.arrivalTime.toOffsetDateTime(),
+        departureTime = this.departureTime,
+        arrivalTime = this.arrivalTime,
         airplaneId = this.airplaneId,
         price = this.price,
         totalSeats = this.totalSeats,
         availableSeats = this.availableSeats,
-        createdAt = this.createdAt.toOffsetDateTime(),
-        updatedAt = this.updatedAt.toOffsetDateTime()
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt
     )
 }
-

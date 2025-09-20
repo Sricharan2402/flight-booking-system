@@ -198,3 +198,12 @@ Journey and JourneySearchResult seem redundant, just return a list of journeys i
 
 ## Prompt 55
 re evaluate openBugs now, also kafka connection is not working debug that
+
+## Prompt 56
+Fix the two bugs, for journey search response, at the controller layer, get seats available using the @src/main/kotlin/com/flightbooking/services/search/SearchService.kt method to calc seats, and send that map of journey to num seats to the api mapper. For the DUration pruning thing in journey creation handle that as part of BFS, draft a plan for this
+
+## Prompt 57
+Evaluate the service again, check for open bugs. Check for any pending implementations. If nothing else is pending we can start the testing part
+
+## Prompt 58
+backfill my prompts pleaseLe

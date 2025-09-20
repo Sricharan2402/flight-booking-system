@@ -18,8 +18,8 @@ fun DomainSearchResponse.toApiResponse(seatCounts: Map<java.util.UUID, Int>): Ap
 fun DomainJourney.toApiJourney(seatCounts: Map<java.util.UUID, Int>): ApiJourney {
     return ApiJourney(
         id = this.journeyId,
-        departureTime = this.departureTime.toOffsetDateTime(),
-        arrivalTime = this.arrivalTime.toOffsetDateTime(),
+        departureTime = this.departureTime,
+        arrivalTime = this.arrivalTime,
         totalPrice = this.totalPrice,
         layoverCount = this.flightDetails.size - 1,
         flights = this.flightDetails.map { it.toApiFlight() },

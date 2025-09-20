@@ -40,6 +40,3 @@ out/
 .kotlin
 
 .env
-
-# Project-specific ignores
-openBugs.md

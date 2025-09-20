@@ -148,6 +148,12 @@ tasks.register<org.openapitools.generator.gradle.plugin.tasks.GenerateTask>("gen
             "exceptionHandler" to "false"
         )
     )
+
+    typeMappings.set(
+        mapOf(
+            "DateTime" to "java.time.ZonedDateTime"
+        )
+    )
 }
 
 // Add generated sources to the main source set

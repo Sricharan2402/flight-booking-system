@@ -281,7 +281,7 @@ class JourneyGenerationServiceTest {
     inner class CyclePrevention {
 
         @Test
-        fun `should not reuse same flight in single journey`() {
+        fun `should not generate journeys for circular flight`() {
             // Given
             val circularFlight = TestDataFactory.createTestFlight(
                 sourceAirport = "DEL",
@@ -290,23 +290,15 @@ class JourneyGenerationServiceTest {
 
             every { flightDao.findById(circularFlight.flightId) } returns circularFlight
             every { journeyDao.findFlightsByDate(any()) } returns listOf(circularFlight)
-            every { journeyDao.save(any()) } returns mockk()
 
             // When
             journeyGenerationService.generateJourneysForNewFlight(circularFlight.flightId)
 
-            // Then
-            val capturedJourneys = mutableListOf<Journey>()
-            verify { journeyDao.save(capture(capturedJourneys)) }
-
-            // Should only create single-leg journey, no multi-leg cycles
-            capturedJourneys.forEach { journey ->
-                val uniqueFlights = journey.flightDetails.map { it.flightId }.toSet()
-                assertEquals(journey.flightDetails.size, uniqueFlights.size,
-                    "Journey should not contain duplicate flights")
-            }
+            // Then → nothing should be persisted
+            verify(exactly = 0) { journeyDao.save(any()) }
         }
     }
+
 
     @Nested
     @DisplayName("Max Depth Enforcement")

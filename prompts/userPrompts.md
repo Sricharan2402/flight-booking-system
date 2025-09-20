@@ -231,3 +231,18 @@ can you now make the application test check absolutely strict and check? It shou
 
 ## Prompt 66
 update my prompts in @userPrompts.md verbatim
+
+## Prompt 67
+@JourneyGenerationServiceTest. CyclePrevention test seems to be incorrectly configured. When there is a cycle, no journeys should be saved. This is a spillover from the journey service fix to handle same source and destination. Verify and fix tis
+
+## Prompt 67
+Do a basic sanity of the system, build, bootRun, tests, etc, then form curls against the flight api, then search, then book for matching details and paste them in some md file
+
+## Prompt 68
+the enum mapping issue is fixed, test the booking flows again and update @test-results/api-test-results.md
+
+## Prompt 69
+Backfill my prompts in @prompts/userPrompts.md and log any futher prompts there
+
+## Prompt 70
+Run the application tests once again for booking and search cache, then update their relevant docs with the latest details of test runs, along with details about the tests, steps etc following a similar format to ther other docs in that @test-results/api-test-results.md

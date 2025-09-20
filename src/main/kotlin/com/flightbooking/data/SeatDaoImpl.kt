@@ -308,4 +308,62 @@ class SeatDaoImpl(
         }
         return "$rowNumber$seatLetter"
     }
+
+    override fun findAvailableSeatsByFlight(flightId: UUID): List<Seat> {
+        return findAvailableSeatsByFlightId(flightId)
+    }
+
+    override fun findBookedSeatsByFlight(flightId: UUID): List<Seat> {
+        return try {
+            logger.debug("Finding booked seats for flight ID: $flightId")
+
+            val results = dslContext.selectFrom(SEATS)
+                .where(SEATS.FLIGHT_ID.eq(flightId))
+                .and(SEATS.STATUS.eq(seatStatusConverter.to(SeatStatus.BOOKED)))
+                .orderBy(SEATS.SEAT_NUMBER)
+                .fetch()
+
+            results.map { record -> seatMapper.fromJooqRecord(record) }
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while finding booked seats for flight $flightId: ${e.message}", e)
+            throw DatabaseException("Failed to find booked seats: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while finding booked seats for flight $flightId: ${e.message}", e)
+            throw DatabaseException("Database error occurred while finding booked seats: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while finding booked seats for flight $flightId: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while finding booked seats: ${e.message}", e)
+        }
+    }
+
+    override fun create(flightId: UUID, seatNumber: String, seatClass: String, price: java.math.BigDecimal, isAvailable: Boolean): Seat {
+        val seat = Seat(
+            seatId = UUID.randomUUID(),
+            flightId = flightId,
+            seatNumber = seatNumber,
+            status = if (isAvailable) SeatStatus.AVAILABLE else SeatStatus.BLOCKED,
+            bookingId = null,
+            createdAt = ZonedDateTime.now(),
+            updatedAt = ZonedDateTime.now()
+        )
+        return save(seat)
+    }
+
+    override fun deleteAll() {
+        try {
+            logger.debug("Deleting all seats")
+            val deletedRows = dslContext.deleteFrom(SEATS).execute()
+            logger.info("Deleted $deletedRows seats")
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while deleting all seats: ${e.message}", e)
+            throw DatabaseException("Failed to delete all seats: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while deleting all seats: ${e.message}", e)
+            throw DatabaseException("Database error occurred while deleting all seats: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while deleting all seats: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while deleting all seats: ${e.message}", e)
+        }
+    }
 }

@@ -174,4 +174,43 @@ class BookingDaoImpl(
             throw DatabaseException("Unexpected error occurred while finding bookings: ${e.message}", e)
         }
     }
+
+    override fun findAll(): List<Booking> {
+        return try {
+            logger.debug("Finding all bookings")
+
+            val results = dslContext.selectFrom(BOOKINGS)
+                .orderBy(BOOKINGS.BOOKING_TIME.desc())
+                .fetch()
+
+            results.map { record -> bookingMapper.fromJooqRecord(record) }
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while finding all bookings: ${e.message}", e)
+            throw DatabaseException("Failed to find all bookings: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while finding all bookings: ${e.message}", e)
+            throw DatabaseException("Database error occurred while finding all bookings: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while finding all bookings: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while finding all bookings: ${e.message}", e)
+        }
+    }
+
+    override fun deleteAll() {
+        try {
+            logger.debug("Deleting all bookings")
+            val deletedRows = dslContext.deleteFrom(BOOKINGS).execute()
+            logger.info("Deleted $deletedRows bookings")
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while deleting all bookings: ${e.message}", e)
+            throw DatabaseException("Failed to delete all bookings: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while deleting all bookings: ${e.message}", e)
+            throw DatabaseException("Database error occurred while deleting all bookings: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while deleting all bookings: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while deleting all bookings: ${e.message}", e)
+        }
+    }
 }

@@ -15,4 +15,8 @@ interface SeatDao {
     fun findByBookingId(bookingId: UUID): List<Seat>
     fun createSeatsForFlight(flightId: UUID, totalSeats: Int): List<Seat>
     fun updateSeatsForBooking(seatIds: List<UUID>, bookingId: UUID, status: SeatStatus): Boolean
+    fun findAvailableSeatsByFlight(flightId: UUID): List<Seat>
+    fun findBookedSeatsByFlight(flightId: UUID): List<Seat>
+    fun create(flightId: UUID, seatNumber: String, seatClass: String, price: java.math.BigDecimal, isAvailable: Boolean): Seat
+    fun deleteAll()
 }

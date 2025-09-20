@@ -45,7 +45,7 @@ class SearchService(
         val searchResponse = performDatabaseSearch(request)
 
         // Cache the results
-        searchCacheService.cacheSearchResults(cacheKey, searchResponse, 600)
+        searchCacheService.cacheSearchResults(cacheKey, searchResponse, 60)
 
         return searchResponse
     }

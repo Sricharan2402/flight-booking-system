@@ -11,4 +11,6 @@ interface BookingDao {
     fun findByJourneyId(journeyId: UUID): List<Booking>
     fun updateBookingStatus(bookingId: UUID, status: BookingStatus): Boolean
     fun findByUserIdAndStatus(userId: UUID, status: BookingStatus): List<Booking>
+    fun findAll(): List<Booking>
+    fun deleteAll()
 }

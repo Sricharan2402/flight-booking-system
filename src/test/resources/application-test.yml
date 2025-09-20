@@ -75,6 +75,18 @@ logging:
     org.springframework.test: INFO
     root: WARN
 
+# Test performance configuration
+test:
+  performance:
+    booking:
+      concurrent-attempts: 10
+      target-success-rate: 2.0
+      max-booking-time-ms: 2000
+    search:
+      concurrent-requests: 1500
+      target-p90-latency-ms: 100
+      cache-hit-ratio-threshold: 95.0
+
 # JUnit configuration
 junit:
   jupiter:

@@ -13,8 +13,10 @@ import java.time.LocalDate
 
 @Service
 class SearchCacheServiceImpl(
-    @Qualifier("searchCacheRedisTemplate") private val searchCacheRedisTemplate: RedisTemplate<String, String>,
-    @Value("\${redis.search.cache-ttl}") private val cacheTtl: Long
+    @Qualifier("searchCacheRedisTemplate")
+    private val searchCacheRedisTemplate: RedisTemplate<String, String>,
+    @Value("\${redis.search.cache-ttl}")
+    private val cacheTtl: Long
 ) : SearchCacheService {
 
     private val logger = LoggerFactory.getLogger(SearchCacheServiceImpl::class.java)
@@ -35,8 +37,9 @@ class SearchCacheServiceImpl(
     override fun cacheSearchResults(cacheKey: String, searchResponse: SearchResponse, ttlSeconds: Long) {
         try {
             val jsonValue = objectMapper.writeValueAsString(searchResponse)
-            searchCacheRedisTemplate.opsForValue().set(cacheKey, jsonValue, Duration.ofSeconds(ttlSeconds))
-            logger.debug("Cached search results for key: $cacheKey")
+            searchCacheRedisTemplate.opsForValue().set(cacheKey, jsonValue)
+            searchCacheRedisTemplate.expire(cacheKey, Duration.ofSeconds(ttlSeconds))
+            logger.debug("Cached search results for key={} ttl={}s", cacheKey, ttlSeconds)
         } catch (e: Exception) {
             logger.error("Failed to cache search results for key: $cacheKey", e)
         }

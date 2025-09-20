@@ -70,15 +70,6 @@ Performance Test Suite
 
 **Key Metrics**: Double-booking rate, lock contention handling, booking response times, success rates
 
-## Comprehensive Coverage Matrix
-
-| Test Category | Functional | Performance | Consistency | Scalability | Infrastructure |
-|---------------|------------|-------------|-------------|-------------|----------------|
-| **Deterministic** | ✅ Core Algorithm | ✅ Execution Time | ✅ Data Integrity | ❌ Single Request | ✅ Database |
-| **Event Processing** | ✅ Event Workflow | ✅ Processing Time | ✅ Event Correlation | ✅ Large Dataset | ✅ Kafka + DB |
-| **Cache Performance** | ✅ Search Logic | ✅ Sub-100ms Latency | ✅ Cache Consistency | ✅ 150 Concurrent | ✅ Redis + DB |
-| **Booking Concurrency** | ✅ Booking Workflow | ✅ P90 <2000ms | ✅ No Double-Booking | ✅ 50 Concurrent | ✅ Redis Locks + DB |
-
 ## Performance Requirements and Validation
 
 ### Critical Performance SLAs

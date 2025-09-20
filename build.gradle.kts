@@ -41,8 +41,9 @@ dependencies {
 
     // Redis
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("redis.clients:jedis:5.0.2")
+    implementation("redis.clients:jedis:5.2.0") // explicitly add Jedis
     implementation("org.apache.commons:commons-pool2:2.11.1")
+
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
@@ -72,6 +73,15 @@ dependencies {
 
     // JSON testing
     testImplementation("com.jayway.jsonpath:json-path")
+}
+
+
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "redis.clients" && requested.name == "jedis") {
+            useVersion("5.2.0")
+        }
+    }
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

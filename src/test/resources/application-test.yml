@@ -83,7 +83,7 @@ test:
       target-success-rate: 2.0
       max-booking-time-ms: 2000
     search:
-      concurrent-requests: 150
+      concurrent-requests: 1500
       target-p90-latency-ms: 100
       cache-hit-ratio-threshold: 95.0
 

@@ -344,7 +344,7 @@ components:
           description: Total price paid for the booking in USD
         status:
           type: string
-          enum: [ confirmed, pending, cancelled ]
+          enum: [ CONFIRMED, PENDING, CANCELLED, RESERVED ]
           description: Current status of the booking
         payment_id:
           type: string

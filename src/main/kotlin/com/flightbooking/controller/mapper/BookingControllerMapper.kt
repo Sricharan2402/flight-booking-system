@@ -26,7 +26,13 @@ fun DomainBookingResponse.toApiResponse(): ApiBookingResponse {
         id = this.id,
         journeyId = this.journeyId,
         passengerCount = this.passengerCount,
-        status = ApiBookingResponse.Status.valueOf(this.status.name.uppercase()),
+        status = when (this.status.name.uppercase()) {
+            "CONFIRMED" -> ApiBookingResponse.Status.cONFIRMED
+            "PENDING" -> ApiBookingResponse.Status.pENDING
+            "CANCELLED" -> ApiBookingResponse.Status.cANCELLED
+            "RESERVED" -> ApiBookingResponse.Status.rESERVED
+            else -> ApiBookingResponse.Status.cONFIRMED
+        },
         paymentId = this.paymentId,
         seatAssignments = this.seatAssignments.map { it.toApiSeatAssignment() },
         journeyDetails = this.journeyDetails.toApiJourneyDetails(),

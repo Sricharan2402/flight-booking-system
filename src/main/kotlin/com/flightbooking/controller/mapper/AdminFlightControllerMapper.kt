@@ -2,8 +2,8 @@ package com.flightbooking.controller.mapper
 
 import com.flightbooking.domain.flights.FlightCreationRequest
 import com.flightbooking.domain.flights.FlightCreationResponse
-import com.flightbooking.generated.admin.model.CreateFlightRequest
-import com.flightbooking.generated.admin.model.FlightResponse
+import com.flightbooking.generated.server.model.CreateFlightRequest
+import com.flightbooking.generated.server.model.FlightResponse
 import java.time.ZoneOffset
 
 fun CreateFlightRequest.toServiceModel(): FlightCreationRequest {

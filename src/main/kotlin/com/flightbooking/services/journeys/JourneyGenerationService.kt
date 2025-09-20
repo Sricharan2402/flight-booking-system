@@ -24,10 +24,10 @@ class JourneyGenerationService(
     companion object {
         private val MIN_LAYOVER_DURATION = Duration.ofMinutes(30)
         private val MAX_LAYOVER_DURATION = Duration.ofHours(4)
+        private val MAX_JOURNEY_DURATION = Duration.ofHours(24)
         private const val MAX_DEPTH = 3
     }
 
-    @Transactional
     fun generateJourneysForNewFlight(flightId: UUID) {
         logger.info("Starting BFS journey generation for new flight ID: $flightId")
 
@@ -56,6 +56,12 @@ class JourneyGenerationService(
             // Skip duplicates
             if (!generatedJourneys.add(signature)) continue
 
+            // Validate journey duration before proceeding
+            if (!isValidJourneyDuration(currentPath)) {
+                logger.debug("Skipping journey with excessive duration: ${Duration.between(currentPath.first().departureTime, currentPath.last().arrivalTime)}")
+                continue
+            }
+
             // Convert current path into a Journey object and collect it
             journeysToSave.add(createJourneyFromFlights(currentPath))
 
@@ -67,7 +73,13 @@ class JourneyGenerationService(
 
             for (nextFlight in forwardConnections) {
                 if (!currentPath.any { it.flightId == nextFlight.flightId }) { // prevent cycles
-                    queue.add(currentPath + nextFlight)
+                    val newPath = currentPath + nextFlight
+                    // Check duration before adding to queue to avoid processing invalid paths
+                    if (isValidJourneyDuration(newPath)) {
+                        queue.add(newPath)
+                    } else {
+                        logger.debug("Rejecting forward connection due to duration limit: ${Duration.between(newPath.first().departureTime, newPath.last().arrivalTime)}")
+                    }
                 }
             }
 
@@ -76,7 +88,13 @@ class JourneyGenerationService(
 
             for (prevFlight in backwardConnections) {
                 if (!currentPath.any { it.flightId == prevFlight.flightId }) { // prevent cycles
-                    queue.add(listOf(prevFlight) + currentPath)
+                    val newPath = listOf(prevFlight) + currentPath
+                    // Check duration before adding to queue to avoid processing invalid paths
+                    if (isValidJourneyDuration(newPath)) {
+                        queue.add(newPath)
+                    } else {
+                        logger.debug("Rejecting backward connection due to duration limit: ${Duration.between(newPath.first().departureTime, newPath.last().arrivalTime)}")
+                    }
                 }
             }
         }
@@ -110,6 +128,17 @@ class JourneyGenerationService(
     private fun isValidLayover(arrivalTime: ZonedDateTime, departureTime: ZonedDateTime): Boolean {
         val layoverDuration = Duration.between(arrivalTime, departureTime)
         return layoverDuration >= MIN_LAYOVER_DURATION && layoverDuration <= MAX_LAYOVER_DURATION
+    }
+
+    private fun isValidJourneyDuration(flights: List<Flight>): Boolean {
+        if (flights.isEmpty()) return true
+
+        val journeyDuration = Duration.between(
+            flights.first().departureTime,
+            flights.last().arrivalTime
+        )
+
+        return journeyDuration <= MAX_JOURNEY_DURATION
     }
 
     private fun createJourneyFromFlights(flights: List<Flight>): Journey {

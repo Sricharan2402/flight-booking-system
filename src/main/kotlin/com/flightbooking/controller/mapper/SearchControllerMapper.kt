@@ -1,35 +1,35 @@
 package com.flightbooking.controller.mapper
 
 import com.flightbooking.domain.search.SearchResponse as DomainSearchResponse
-import com.flightbooking.domain.search.JourneySearchResult as DomainJourneySearchResult
-import com.flightbooking.domain.search.FlightSearchResult as DomainFlightSearchResult
-import com.flightbooking.generated.search.model.SearchResponse as ApiSearchResponse
-import com.flightbooking.generated.search.model.Journey as ApiJourney
-import com.flightbooking.generated.search.model.FlightReference as ApiFlight
-import java.math.BigDecimal
+import com.flightbooking.domain.journeys.Journey as DomainJourney
+import com.flightbooking.domain.journeys.FlightReference as DomainFlightReference
+import com.flightbooking.generated.server.model.SearchResponse as ApiSearchResponse
+import com.flightbooking.generated.server.model.Journey as ApiJourney
+import com.flightbooking.generated.server.model.FlightReference as ApiFlight
+import java.time.ZoneOffset
 
-fun DomainSearchResponse.toApiResponse(): ApiSearchResponse {
+fun DomainSearchResponse.toApiResponse(seatCounts: Map<java.util.UUID, Int>): ApiSearchResponse {
     return ApiSearchResponse(
-        journeys = this.journeys.map { it.toApiJourney() },
+        journeys = this.journeys.map { it.toApiJourney(seatCounts) },
         totalCount = this.totalCount
     )
 }
 
-fun DomainJourneySearchResult.toApiJourney(): ApiJourney {
+fun DomainJourney.toApiJourney(seatCounts: Map<java.util.UUID, Int>): ApiJourney {
     return ApiJourney(
-        id = java.util.UUID.fromString(this.id),
-        departureTime = java.time.OffsetDateTime.parse(this.departureTime),
-        arrivalTime = java.time.OffsetDateTime.parse(this.arrivalTime),
-        totalPrice = BigDecimal(this.totalPrice),
-        layoverCount = this.layoverCount,
-        flights = this.flights.mapIndexed { index, flight -> flight.toApiFlight(index + 1) },
-        availableSeats = this.availableSeats
+        id = this.journeyId,
+        departureTime = this.departureTime.toOffsetDateTime(),
+        arrivalTime = this.arrivalTime.toOffsetDateTime(),
+        totalPrice = this.totalPrice,
+        layoverCount = this.flightDetails.size - 1,
+        flights = this.flightDetails.map { it.toApiFlight() },
+        availableSeats = seatCounts[this.journeyId] ?: 0
     )
 }
 
-fun DomainFlightSearchResult.toApiFlight(order: Int): ApiFlight {
+fun DomainFlightReference.toApiFlight(): ApiFlight {
     return ApiFlight(
-        id = java.util.UUID.fromString(this.id),
-        order = order
+        id = this.flightId,
+        order = this.order
     )
 }

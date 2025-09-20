@@ -1,16 +1,13 @@
 package com.flightbooking.services.booking
 
-import com.flightbooking.data.BookingDao
-import com.flightbooking.data.SeatDao
-import com.flightbooking.data.JourneyDao
-import com.flightbooking.data.FlightDao
+import com.flightbooking.data.*
 import com.flightbooking.domain.bookings.*
 import com.flightbooking.domain.common.BookingStatus
 import com.flightbooking.domain.common.SeatStatus
+import com.flightbooking.services.reservation.SeatReservationService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -19,37 +16,31 @@ class BookingService(
     private val bookingDao: BookingDao,
     private val seatDao: SeatDao,
     private val journeyDao: JourneyDao,
-    private val flightDao: FlightDao
+    private val flightDao: FlightDao,
+    private val seatReservationService: SeatReservationService
 ) {
-
     private val logger = LoggerFactory.getLogger(BookingService::class.java)
 
-    @Transactional
+
     fun createBooking(request: BookingRequest): BookingResponse {
         logger.info("Creating booking for journey ${request.journeyId} with ${request.passengerCount} passengers")
 
-        // Validate journey exists and is active
+        // 1. Validate journey
         val journey = journeyDao.findById(request.journeyId)
             ?: throw IllegalArgumentException("Journey not found: ${request.journeyId}")
 
-        // Get flight details for the journey
+        // 2. Get ordered flights
         val flightIds = journey.flightDetails.map { it.flightId }
         val flights = flightIds.mapNotNull { flightDao.findById(it) }
-            .sortedBy { flight -> journey.flightDetails.find { it.flightId == flight.flightId }?.order ?: 0 }
+            .sortedBy { f -> journey.flightDetails.find { it.flightId == f.flightId }?.order ?: 0 }
 
-        // Check seat availability across all flights
-        validateSeatAvailability(flightIds, request.passengerCount)
+        // 3. Reserve seats in Redis
+        val reservedSeats = reserveSeatsWithSortedSet(flightIds, request.passengerCount)
 
-        // Reserve seats for each flight in the journey
-        val seatAssignments = reserveSeatsForJourney(flightIds, request.passengerCount)
-
-        // Calculate total price
-        val totalPrice = journey.totalPrice * BigDecimal(request.passengerCount)
-
-        // Create booking record
+        // 4. Save booking record
         val booking = Booking(
             bookingId = UUID.randomUUID(),
-            userId = request.userId ?: UUID.randomUUID(),
+            userId = request.userId,
             journeyId = request.journeyId,
             numberOfSeats = request.passengerCount,
             status = BookingStatus.CONFIRMED,
@@ -61,15 +52,30 @@ class BookingService(
 
         val savedBooking = bookingDao.save(booking)
 
-        // Update seats with booking ID
-        for ((flightId, seatIds) in seatAssignments) {
-            seatDao.updateSeatsForBooking(seatIds, savedBooking.bookingId, SeatStatus.BOOKED)
+        try {
+            // 5. Update DB seat records
+            for ((_, seatIds) in reservedSeats) {
+                seatDao.updateSeatsForBooking(seatIds, savedBooking.bookingId, SeatStatus.BOOKED)
+            }
+
+            // 6. Release Redis reservations (DB is now source of truth)
+            for ((flightId, seatIds) in reservedSeats) {
+                seatReservationService.releaseSeats(flightId, seatIds)
+            }
+
+            // 7. Fetch actual assigned seats from DB for response
+            val seatAssignments = getSeatAssignments(savedBooking.bookingId)
+
+            logger.info("Successfully created booking with ID: ${savedBooking.bookingId}")
+            return buildBookingResponse(savedBooking, journey, flights, seatAssignments)
+
+        } catch (e: Exception) {
+            logger.error("Failed to finalize booking, releasing reservations", e)
+            for ((flightId, seatIds) in reservedSeats) {
+                seatReservationService.releaseSeats(flightId, seatIds)
+            }
+            throw e
         }
-
-        logger.info("Successfully created booking with ID: ${savedBooking.bookingId}")
-
-        // Build response
-        return buildBookingResponse(savedBooking, seatAssignments, journey, flights)
     }
 
     fun getBooking(bookingId: UUID): BookingResponse {
@@ -83,74 +89,75 @@ class BookingService(
 
         val flightIds = journey.flightDetails.map { it.flightId }
         val flights = flightIds.mapNotNull { flightDao.findById(it) }
-            .sortedBy { flight -> journey.flightDetails.find { it.flightId == flight.flightId }?.order ?: 0 }
+            .sortedBy { f -> journey.flightDetails.find { it.flightId == f.flightId }?.order ?: 0 }
 
-        // Get seat assignments for this booking
+        val seatAssignments = getSeatAssignments(bookingId)
+
+        logger.info("Successfully retrieved booking with ID: $bookingId")
+        return buildBookingResponse(booking, journey, flights, seatAssignments)
+    }
+
+    // -------------------- Helpers --------------------
+
+    private fun reserveSeatsWithSortedSet(
+        flightIds: List<UUID>,
+        passengerCount: Int
+    ): Map<UUID, List<UUID>> {
+        val seatAssignments = mutableMapOf<UUID, List<UUID>>()
+        val reservedFlights = mutableListOf<UUID>()
+
+        try {
+            for (flightId in flightIds) {
+                val dbAvailableSeats = seatDao.findAvailableSeatsByFlightId(flightId)
+                val allAvailableSeatIds = dbAvailableSeats.map { it.seatId }
+
+                val actuallyAvailableSeats =
+                    seatReservationService.getAvailableSeats(flightId, allAvailableSeatIds)
+
+                if (actuallyAvailableSeats.size < passengerCount) {
+                    throw IllegalArgumentException(
+                        "Insufficient seats on flight $flightId. Required=$passengerCount, Available=${actuallyAvailableSeats.size}"
+                    )
+                }
+
+                val seatsToReserve = actuallyAvailableSeats.take(passengerCount)
+                if (!seatReservationService.reserveSeats(flightId, seatsToReserve, 300)) {
+                    throw IllegalStateException("Unable to reserve seats for flight $flightId. Try again.")
+                }
+
+                seatAssignments[flightId] = seatsToReserve
+                reservedFlights.add(flightId)
+            }
+
+            return seatAssignments
+        } catch (e: Exception) {
+            logger.error("Error during seat reservation, rolling back", e)
+            for (flightId in reservedFlights) {
+                seatAssignments[flightId]?.let { seatIds ->
+                    seatReservationService.releaseSeats(flightId, seatIds)
+                }
+            }
+            throw e
+        }
+    }
+
+    private fun getSeatAssignments(bookingId: UUID): List<SeatAssignment> {
         val bookedSeats = seatDao.findByBookingId(bookingId)
-        val seatAssignments = bookedSeats.groupBy { it.flightId }
+        return bookedSeats.groupBy { it.flightId }
             .map { (flightId, seats) ->
                 SeatAssignment(
                     flightId = flightId,
                     seatNumbers = seats.map { it.seatNumber }
                 )
             }
-
-        logger.info("Successfully retrieved booking with ID: $bookingId")
-
-        return buildBookingResponse(booking, emptyMap(), journey, flights, seatAssignments)
-    }
-
-    private fun validateSeatAvailability(flightIds: List<UUID>, passengerCount: Int) {
-        for (flightId in flightIds) {
-            val availableSeats = seatDao.countAvailableSeatsByFlightId(flightId)
-            if (availableSeats < passengerCount) {
-                throw IllegalArgumentException("Insufficient seats available on flight $flightId. Required: $passengerCount, Available: $availableSeats")
-            }
-        }
-    }
-
-    private fun reserveSeatsForJourney(flightIds: List<UUID>, passengerCount: Int): Map<UUID, List<UUID>> {
-        val seatAssignments = mutableMapOf<UUID, List<UUID>>()
-
-        for (flightId in flightIds) {
-            val availableSeats = seatDao.findAvailableSeatsByFlightId(flightId)
-            if (availableSeats.size < passengerCount) {
-                throw IllegalArgumentException("Insufficient seats available on flight $flightId")
-            }
-
-            val seatsToReserve = availableSeats.take(passengerCount)
-            val seatIds = seatsToReserve.map { it.seatId }
-
-            // Reserve seats (update status to RESERVED)
-            for (seatId in seatIds) {
-                seatDao.updateSeatStatus(seatId, SeatStatus.RESERVED, null)
-            }
-
-            seatAssignments[flightId] = seatIds
-        }
-
-        return seatAssignments
     }
 
     private fun buildBookingResponse(
         booking: Booking,
-        seatAssignmentMap: Map<UUID, List<UUID>>,
         journey: com.flightbooking.domain.journeys.Journey,
         flights: List<com.flightbooking.domain.flights.Flight>,
-        existingSeatAssignments: List<SeatAssignment> = emptyList()
+        seatAssignments: List<SeatAssignment>
     ): BookingResponse {
-
-        val seatAssignments = existingSeatAssignments.ifEmpty {
-            // Build seat assignments from the reservation map
-            // This would need to be enhanced to get actual seat numbers
-            seatAssignmentMap.map { (flightId, seatIds) ->
-                SeatAssignment(
-                    flightId = flightId,
-                    seatNumbers = seatIds.map { "TBD" } // TODO: Get actual seat numbers
-                )
-            }
-        }
-
         val journeyDetails = JourneyDetails(
             id = journey.journeyId,
             departureTime = journey.departureTime,

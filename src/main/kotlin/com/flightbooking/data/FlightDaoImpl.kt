@@ -93,6 +93,71 @@ class FlightDaoImpl(
         return zonedDateTime.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
     }
 
+    override fun count(): Long {
+        return try {
+            logger.debug("Counting total flights")
+
+            val result = dslContext.selectCount()
+                .from(FLIGHTS)
+                .fetchOne(0, Long::class.java)
+
+            result ?: 0L
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while counting flights: ${e.message}", e)
+            throw DatabaseException("Failed to count flights: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while counting flights: ${e.message}", e)
+            throw DatabaseException("Database error occurred while counting flights: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while counting flights: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while counting flights: ${e.message}", e)
+        }
+    }
+
+    override fun findAll(): List<Flight> {
+        return try {
+            logger.debug("Finding all flights")
+
+            val results = dslContext.selectFrom(FLIGHTS)
+                .fetch()
+
+            results.map { record -> mapper.fromJooqRecord(record) }
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while finding all flights: ${e.message}", e)
+            throw DatabaseException("Failed to find all flights: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while finding all flights: ${e.message}", e)
+            throw DatabaseException("Database error occurred while finding all flights: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while finding all flights: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while finding all flights: ${e.message}", e)
+        }
+    }
+
+    override fun deleteAll(): Int {
+        return try {
+            logger.debug("Deleting all flights")
+
+            val deletedCount = dslContext.deleteFrom(FLIGHTS)
+                .execute()
+
+            logger.info("Successfully deleted $deletedCount flights")
+            deletedCount
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while deleting all flights: ${e.message}", e)
+            throw DatabaseException("Failed to delete all flights: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while deleting all flights: ${e.message}", e)
+            throw DatabaseException("Database error occurred while deleting all flights: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while deleting all flights: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while deleting all flights: ${e.message}", e)
+        }
+    }
+
     private fun toZonedDateTime(localDateTime: LocalDateTime): ZonedDateTime {
         return localDateTime.atZone(ZoneOffset.UTC)
     }

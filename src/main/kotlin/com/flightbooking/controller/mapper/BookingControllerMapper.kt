@@ -26,12 +26,12 @@ fun DomainBookingResponse.toApiResponse(): ApiBookingResponse {
         id = this.id,
         journeyId = this.journeyId,
         passengerCount = this.passengerCount,
-        status = ApiBookingResponse.Status.valueOf(this.status.uppercase()),
+        status = ApiBookingResponse.Status.valueOf(this.status.name.uppercase()),
         paymentId = this.paymentId,
         seatAssignments = this.seatAssignments.map { it.toApiSeatAssignment() },
         journeyDetails = this.journeyDetails.toApiJourneyDetails(),
-        createdAt = this.createdAt.toOffsetDateTime(),
-        updatedAt = this.updatedAt.toOffsetDateTime()
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
     )
 }
 
@@ -45,8 +45,8 @@ fun DomainSeatAssignment.toApiSeatAssignment(): ApiSeatAssignment {
 fun DomainJourneyDetails.toApiJourneyDetails(): ApiJourneyDetails {
     return ApiJourneyDetails(
         id = this.id,
-        departureTime = this.departureTime.toOffsetDateTime(),
-        arrivalTime = this.arrivalTime.toOffsetDateTime(),
+        departureTime = this.departureTime,
+        arrivalTime = this.arrivalTime,
         layoverCount = this.layoverCount,
         flights = this.flights.map{ it.toApiFlight() },
     )

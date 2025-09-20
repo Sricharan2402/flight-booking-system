@@ -1,49 +1,47 @@
 spring:
   application:
-    name: flight-booking-system
+    name: flight-booking-system-test
 
-  profiles:
-    active: local
-
-  # PostgreSQL Database Configuration
+  # PostgreSQL Database Configuration (Production DB with cleanup)
   datasource:
     url: jdbc:postgresql://localhost:5433/flight_booking
     username: flight_user
     password: flight_password
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 10000
+      idle-timeout: 300000
+      max-lifetime: 600000
 
-  # Flyway Configuration
+  # Flyway Configuration (Production DB)
   flyway:
     url: jdbc:postgresql://localhost:5433/flight_booking
     user: flight_user
     password: flight_password
     schemas: public
+    clean-disabled: false
 
-  # Redis Configuration
+  # Redis Test Configuration
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6380}
       password: ${REDIS_PASSWORD:}
-      timeout: 2000ms
+      timeout: 1000ms
       jedis:
         pool:
-          max-active: 50
-          max-idle: 10
-          min-idle: 2
-          max-wait: 2000ms
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+          max-wait: 1000ms
 
-  # Kafka Configuration
+  # Kafka Test Configuration
   kafka:
     bootstrap-servers: localhost:9093
     consumer:
-      group-id: flight-booking-consumer
+      group-id: flight-booking-test-consumer
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
@@ -53,32 +51,35 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
-      retries: 3
-      properties:
-        enable.idempotence: true
+      retries: 1
 
-server:
-  port: 8080
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics
-  endpoint:
-    health:
-      show-details: when-authorized
-
-# Custom Redis configuration
+# Custom Redis test configuration
 redis:
   search:
-    cache-ttl: 600  # 10 minutes for search cache
+    cache-ttl: 60  # 1 minute for tests
   booking:
-    reservation-ttl: 300    # 5 minutes for seat reservations
-    cleanup-interval: 60    # seconds between cleanup operations
+    reservation-ttl: 30    # 30 seconds for tests
+    cleanup-interval: 10   # 10 seconds between cleanup
 
+# Flight events configuration for tests
+flight:
+  events:
+    producer:
+      enabled: false  # Disable Kafka producer for deterministic tests
+
+# Test-specific logging
 logging:
   level:
-    com.flightbooking: INFO
+    com.flightbooking: DEBUG
     org.springframework.kafka: WARN
-    org.hibernate.SQL: WARN
+    org.springframework.test: INFO
+    root: WARN
+
+# JUnit configuration
+junit:
+  jupiter:
+    execution:
+      parallel:
+        enabled: true
+        mode:
+          default: concurrent

@@ -34,25 +34,27 @@ class BookingService(
         val flights = flightIds.mapNotNull { flightDao.findById(it) }
             .sortedBy { f -> journey.flightDetails.find { it.flightId == f.flightId }?.order ?: 0 }
 
-        // 3. Reserve seats in Redis
-        val reservedSeats = reserveSeatsWithSortedSet(flightIds, request.passengerCount)
-
-        // 4. Save booking record
-        val booking = Booking(
-            bookingId = UUID.randomUUID(),
-            userId = request.userId,
-            journeyId = request.journeyId,
-            numberOfSeats = request.passengerCount,
-            status = BookingStatus.CONFIRMED,
-            paymentId = request.paymentId,
-            bookingTime = ZonedDateTime.now(),
-            createdAt = ZonedDateTime.now(),
-            updatedAt = ZonedDateTime.now()
-        )
-
-        val savedBooking = bookingDao.save(booking)
+        var reservedSeats: Map<UUID, List<UUID>>? = null
 
         try {
+            // 3. Reserve seats in Redis
+            reservedSeats = reserveSeatsWithSortedSet(flightIds, request.passengerCount)
+
+            // 4. Save booking record
+            val booking = Booking(
+                bookingId = UUID.randomUUID(),
+                userId = request.userId,
+                journeyId = request.journeyId,
+                numberOfSeats = request.passengerCount,
+                status = BookingStatus.CONFIRMED,
+                paymentId = request.paymentId,
+                bookingTime = ZonedDateTime.now(),
+                createdAt = ZonedDateTime.now(),
+                updatedAt = ZonedDateTime.now()
+            )
+
+            val savedBooking = bookingDao.save(booking)
+
             // 5. Update DB seat records
             for ((_, seatIds) in reservedSeats) {
                 seatDao.updateSeatsForBooking(seatIds, savedBooking.bookingId, SeatStatus.BOOKED)
@@ -70,9 +72,12 @@ class BookingService(
             return buildBookingResponse(savedBooking, journey, flights, seatAssignments)
 
         } catch (e: Exception) {
-            logger.error("Failed to finalize booking, releasing reservations", e)
-            for ((flightId, seatIds) in reservedSeats) {
-                seatReservationService.releaseSeats(flightId, seatIds)
+            logger.error("Failed to create booking, releasing any Redis reservations", e)
+            // Clean up ANY Redis reservations that were made
+            reservedSeats?.let { reservations ->
+                for ((flightId, seatIds) in reservations) {
+                    seatReservationService.releaseSeats(flightId, seatIds)
+                }
             }
             throw e
         }
@@ -170,7 +175,7 @@ class BookingService(
             id = booking.bookingId,
             journeyId = booking.journeyId,
             passengerCount = booking.numberOfSeats,
-            status = booking.status.name,
+            status = booking.status,
             paymentId = booking.paymentId,
             seatAssignments = seatAssignments,
             journeyDetails = journeyDetails,

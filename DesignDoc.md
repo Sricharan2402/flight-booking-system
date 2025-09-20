@@ -556,5 +556,3 @@ Algorithm: SearchJourneys(source, destination, date, passengers, sort_by)
 - **Database**: PostgreSQL with read replicas
 - **Monitoring**: Custom dashboards for search latency, booking success rate
 - **Logging**: Structured JSON logs with correlation IDs
-
-This design provides a robust foundation for a high-performance flight booking system that meets all specified functional and non-functional requirements while maintaining scalability and consistency guarantees.

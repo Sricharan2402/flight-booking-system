@@ -9,4 +9,10 @@ interface FlightDao {
     fun save(flightCreationRequest: FlightCreationRequest): Flight
 
     fun findById(flightId: UUID): Flight?
+
+    fun count(): Long
+
+    fun findAll(): List<Flight>
+
+    fun deleteAll(): Int
 }

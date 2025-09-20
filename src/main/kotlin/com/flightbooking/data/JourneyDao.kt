@@ -10,4 +10,7 @@ interface JourneyDao {
     fun findBySourceAndDestinationAndDate(source: String, destination: String, date: LocalDate): List<Journey>
     fun findFlightsByDate(date: LocalDate): List<Flight>
     fun findById(journeyId: UUID): Journey?
+    fun count(): Long
+    fun findAll(): List<Journey>
+    fun deleteAll(): Int
 }

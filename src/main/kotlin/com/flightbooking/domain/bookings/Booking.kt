@@ -29,7 +29,7 @@ data class BookingResponse(
     val id: UUID,
     val journeyId: UUID,
     val passengerCount: Int,
-    val status: String,
+    val status: BookingStatus,
     val paymentId: String,
     val seatAssignments: List<SeatAssignment>,
     val journeyDetails: JourneyDetails,

@@ -6,6 +6,7 @@ import java.util.*
 
 interface SeatDao {
     fun save(seat: Seat): Seat
+    fun saveAll(seats: List<Seat>): List<Seat>
     fun findById(seatId: UUID): Seat?
     fun findByFlightId(flightId: UUID): List<Seat>
     fun findAvailableSeatsByFlightId(flightId: UUID): List<Seat>

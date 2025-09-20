@@ -10,6 +10,7 @@ import org.jooq.DSLContext
 import org.jooq.exception.DataAccessException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.sql.SQLException
 import java.time.ZonedDateTime
 import java.time.ZoneOffset
@@ -52,6 +53,42 @@ class SeatDaoImpl(
         } catch (e: Exception) {
             logger.error("Unexpected error while saving seat: ${e.message}", e)
             throw DatabaseException("Unexpected error occurred while saving seat: ${e.message}", e)
+        }
+    }
+
+    @Transactional
+    override fun saveAll(seats: List<Seat>): List<Seat> {
+        return try {
+            logger.debug("Saving ${seats.size} seats in batch")
+
+            val savedSeats = mutableListOf<Seat>()
+
+            seats.forEach { seat ->
+                val result = dslContext.insertInto(SEATS)
+                    .set(SEATS.SEAT_ID, seat.seatId)
+                    .set(SEATS.FLIGHT_ID, seat.flightId)
+                    .set(SEATS.SEAT_NUMBER, seat.seatNumber)
+                    .set(SEATS.STATUS, seatStatusConverter.to(seat.status))
+                    .set(SEATS.BOOKING_ID, seat.bookingId)
+                    .returningResult(SEATS.asterisk())
+                    .fetchOne()
+
+                requireNotNull(result) { "Failed to insert seat ${seat.seatId} - no result returned" }
+                savedSeats.add(seatMapper.fromJooqRecord(result.into(SEATS)))
+            }
+
+            logger.info("Successfully saved ${savedSeats.size} seats in batch")
+            savedSeats
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while saving seats in batch: ${e.message}", e)
+            throw DatabaseException("Failed to save seats in batch: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while saving seats in batch: ${e.message}", e)
+            throw DatabaseException("Database error occurred while saving seats in batch: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while saving seats in batch: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while saving seats in batch: ${e.message}", e)
         }
     }
 
@@ -217,13 +254,13 @@ class SeatDaoImpl(
                     createdAt = now,
                     updatedAt = now
                 )
-
-                val savedSeat = save(seat)
-                seats.add(savedSeat)
+                seats.add(seat)
             }
 
-            logger.info("Successfully created ${seats.size} seats for flight $flightId")
-            seats
+            // Use saveAll for better atomicity
+            val savedSeats = saveAll(seats)
+            logger.info("Successfully created ${savedSeats.size} seats for flight $flightId")
+            savedSeats
 
         } catch (e: Exception) {
             logger.error("Error while creating seats for flight $flightId: ${e.message}", e)

@@ -145,6 +145,71 @@ class JourneyDaoImpl(
         }
     }
 
+    override fun count(): Long {
+        return try {
+            logger.debug("Counting total journeys")
+
+            val result = dslContext.selectCount()
+                .from(JOURNEYS)
+                .fetchOne(0, Long::class.java)
+
+            result ?: 0L
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while counting journeys: ${e.message}", e)
+            throw DatabaseException("Failed to count journeys: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while counting journeys: ${e.message}", e)
+            throw DatabaseException("Database error occurred while counting journeys: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while counting journeys: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while counting journeys: ${e.message}", e)
+        }
+    }
+
+    override fun findAll(): List<Journey> {
+        return try {
+            logger.debug("Finding all journeys")
+
+            val results = dslContext.selectFrom(JOURNEYS)
+                .fetch()
+
+            results.map { record -> journeyMapper.fromJooqRecord(record) }
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while finding all journeys: ${e.message}", e)
+            throw DatabaseException("Failed to find all journeys: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while finding all journeys: ${e.message}", e)
+            throw DatabaseException("Database error occurred while finding all journeys: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while finding all journeys: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while finding all journeys: ${e.message}", e)
+        }
+    }
+
+    override fun deleteAll(): Int {
+        return try {
+            logger.debug("Deleting all journeys")
+
+            val deletedCount = dslContext.deleteFrom(JOURNEYS)
+                .execute()
+
+            logger.info("Successfully deleted $deletedCount journeys")
+            deletedCount
+
+        } catch (e: DataAccessException) {
+            logger.error("Database access error while deleting all journeys: ${e.message}", e)
+            throw DatabaseException("Failed to delete all journeys: ${e.message}", e)
+        } catch (e: SQLException) {
+            logger.error("SQL error while deleting all journeys: ${e.message}", e)
+            throw DatabaseException("Database error occurred while deleting all journeys: ${e.message}", e)
+        } catch (e: Exception) {
+            logger.error("Unexpected error while deleting all journeys: ${e.message}", e)
+            throw DatabaseException("Unexpected error occurred while deleting all journeys: ${e.message}", e)
+        }
+    }
+
     private fun toLocalDateTime(zonedDateTime: ZonedDateTime): LocalDateTime {
         return zonedDateTime.withZoneSameInstant(ZoneOffset.UTC).toLocalDateTime()
     }

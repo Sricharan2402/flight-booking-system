@@ -60,6 +60,18 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("io.mockk:mockk:1.13.8")
+
+    // Kafka testing
+    testImplementation("org.springframework.kafka:spring-kafka-test")
+
+    // Async testing utilities
+    testImplementation("org.awaitility:awaitility-kotlin:4.2.0")
+
+    // Additional Spring test utilities
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+
+    // JSON testing
+    testImplementation("com.jayway.jsonpath:json-path")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {

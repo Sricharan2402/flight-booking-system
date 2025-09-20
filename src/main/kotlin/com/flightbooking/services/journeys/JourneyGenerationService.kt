@@ -62,8 +62,13 @@ class JourneyGenerationService(
                 continue
             }
 
-            // Convert current path into a Journey object and collect it
-            journeysToSave.add(createJourneyFromFlights(currentPath))
+            // Validate and convert current path into a Journey object
+            val journey = createJourneyFromFlights(currentPath)
+            if (isValidJourney(journey)) {
+                journeysToSave.add(journey)
+            } else {
+                logger.debug("Skipping invalid journey (same source/destination): ${journey.sourceAirport} → ${journey.destinationAirport}")
+            }
 
             // Stop expanding if reached max depth
             if (currentPath.size >= MAX_DEPTH) continue
@@ -139,6 +144,23 @@ class JourneyGenerationService(
         )
 
         return journeyDuration <= MAX_JOURNEY_DURATION
+    }
+
+    /**
+     * Validates that a journey meets business rules:
+     * - Source and destination airports must be different
+     * - Additional validations can be added here
+     */
+    private fun isValidJourney(journey: Journey): Boolean {
+        // Ensure source and destination airports are different
+        if (journey.sourceAirport == journey.destinationAirport) {
+            return false
+        }
+
+        // Additional journey validations can be added here
+        // e.g., minimum flight count, price validation, etc.
+
+        return true
     }
 
     private fun createJourneyFromFlights(flights: List<Flight>): Journey {

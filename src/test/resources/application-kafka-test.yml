@@ -1,0 +1,125 @@
+spring:
+  application:
+    name: flight-booking-system-kafka-test
+
+  # PostgreSQL Database Configuration (Production DB with cleanup)
+  datasource:
+    url: jdbc:postgresql://localhost:5433/flight_booking
+    username: flight_user
+    password: flight_password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 15      # Increased for large dataset processing
+      minimum-idle: 3            # Higher minimum for concurrent operations
+      connection-timeout: 15000  # Increased timeout
+      idle-timeout: 600000       # 10 minutes
+      max-lifetime: 1200000      # 20 minutes
+
+  # Flyway Configuration (Production DB)
+  flyway:
+    url: jdbc:postgresql://localhost:5433/flight_booking
+    user: flight_user
+    password: flight_password
+    schemas: public
+    clean-disabled: false
+
+  # Redis Test Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6380}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000ms            # Increased timeout for large operations
+      jedis:
+        pool:
+          max-active: 20         # Increased pool size
+          max-idle: 10
+          min-idle: 2
+          max-wait: 2000ms
+
+  # Kafka Configuration - ENABLED for performance testing
+  kafka:
+    bootstrap-servers: localhost:9093
+    consumer:
+      group-id: flight-booking-kafka-test-consumer
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      spring.json.value.default.type: "com.flightbooking.domain.flights.FlightCreationEvent"
+      properties:
+        spring.json.trusted.packages: "com.flightbooking.domain.*"
+        max.poll.records: 10               # Process events in smaller batches
+        session.timeout.ms: 30000          # Increased session timeout
+        heartbeat.interval.ms: 3000        # Regular heartbeats
+        enable.auto.commit: true
+        auto.commit.interval.ms: 1000
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all                            # Ensure durability
+      retries: 3                          # Retry failed sends
+      batch-size: 16384                   # Batch events for efficiency
+      linger-ms: 5                        # Small delay to allow batching
+      compression-type: snappy            # Compress messages
+      properties:
+        max.in.flight.requests.per.connection: 1  # Ensure ordering
+
+# Custom Redis configuration for larger datasets
+redis:
+  search:
+    cache-ttl: 120    # 2 minutes for test data
+  booking:
+    reservation-ttl: 60     # 1 minute for tests
+    cleanup-interval: 15    # 15 seconds between cleanup
+
+# Flight events configuration - ENABLED for Kafka performance tests
+flight:
+  events:
+    producer:
+      enabled: true   # Enable Kafka producer for performance testing
+
+# Performance test specific logging
+logging:
+  level:
+    com.flightbooking.producers: INFO
+    com.flightbooking.consumers: INFO
+    com.flightbooking.services.metrics: INFO
+    com.flightbooking.utils: INFO
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    org.springframework.test: INFO
+    root: WARN
+
+# JUnit configuration for large dataset tests
+junit:
+  jupiter:
+    execution:
+      parallel:
+        enabled: false        # Disable parallel execution for Kafka tests
+        mode:
+          default: same_thread
+      timeout:
+        default: 10m          # 10 minute timeout for large dataset processing
+        testable: 15m         # 15 minute timeout for individual tests
+
+# Test-specific configuration
+test:
+  performance:
+    # Large dataset configuration
+    baseline-flights: 30
+    baseline-journeys: 20
+    test-flights: 5
+
+    # Performance thresholds
+    max-producer-time-ms: 1000
+    max-consumer-time-ms: 500
+    min-success-rate: 99.0
+    max-event-lag: 5
+
+    # Test execution configuration
+    flight-creation-delay-ms: 25    # 25ms delay between flight creations
+    metrics-log-interval-seconds: 10  # Log metrics every 10 seconds
+
+    # Database cleanup configuration
+    cleanup-batch-size: 100
+    cleanup-delay-ms: 10

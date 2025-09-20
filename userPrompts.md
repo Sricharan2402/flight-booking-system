@@ -206,4 +206,28 @@ Fix the two bugs, for journey search response, at the controller layer, get seat
 Evaluate the service again, check for open bugs. Check for any pending implementations. If nothing else is pending we can start the testing part
 
 ## Prompt 58
-backfill my prompts pleaseLe
+backfill my prompts please
+
+## Prompt 59
+Let's start testing flows. Go through @tests/testsPrompt.md. Draft a plan for unit tests first, then application tests
+
+## Prompt 60
+@src/test/kotlin/com/flightbooking/services/booking/BookingServiceTest.kt has syntax issues. updateSeatsForBooking returns a boolean value. It cannot be combined with just Runs, check and update
+
+## Prompt 61
+@src/test/kotlin/com/flightbooking/services/admin/AdminFlightServiceTest.kt has syntax issues, there is no saveAll in seatDao. However, instead of fixing that here, add a saveAll method to seatDao and create a transactional block there to store multiple seats. And make that change in booking service and tests (wherever required) this will give better atomicitiy to the system
+
+## Prompt 62
+Can you run @src/test/kotlin/com/flightbooking/application/DeterministicFlightCreationJourneyGenerationApplicationTest.kt now. Before that get the context again, that has made the validation stricter.
+
+## Prompt 63
+Essentially the learning is our code did not cover the case where if for any journey the source and destination is the same, we should not cover this. Could you add this in the code for journey creation, then also update in the DesignDoc in a section called Missed Edge Cases during discussion and mention this
+
+## Prompt 64
+only update @src/test/kotlin/com/flightbooking/application/DeterministicFlightCreationJourneyGenerationApplicationTest.kt with the strict constraints
+
+## Prompt 65
+can you now make the application test check absolutely strict and check? It should match correct?
+
+## Prompt 66
+update my prompts in @userPrompts.md verbatim

@@ -26,7 +26,7 @@ fun DomainBookingResponse.toApiResponse(): ApiBookingResponse {
         id = this.id,
         journeyId = this.journeyId,
         passengerCount = this.passengerCount,
-        status = ApiBookingResponse.Status.valueOf(this.status.uppercase()),
+        status = ApiBookingResponse.Status.valueOf(this.status.name.uppercase()),
         paymentId = this.paymentId,
         seatAssignments = this.seatAssignments.map { it.toApiSeatAssignment() },
         journeyDetails = this.journeyDetails.toApiJourneyDetails(),
